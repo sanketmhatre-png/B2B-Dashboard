@@ -170,25 +170,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .kpi:nth-child(1){animation-delay:.04s}.kpi:nth-child(2){animation-delay:.08s}
 .kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.16s}
 .kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.24s}
-
-/* ─── HEADER SELECTS ─── */
-.hdr-select{
-  background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.22);
-  border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;
-  color:#fff;font-family:'Nunito',sans-serif;cursor:pointer;min-width:110px;
-  appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,.5)'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;
-  height:30px;
-}
-.hdr-select:hover{background-color:rgba(41,182,246,.25);border-color:var(--sky2);}
-.hdr-select option{background:#1a237e;color:#fff;font-weight:700;}
-.active-filter-badge{
-  background:rgba(41,182,246,.25);border:1.5px solid var(--sky2);
-  border-radius:8px;padding:4px 10px;font-size:9px;font-weight:800;
-  color:var(--sky2);font-family:'JetBrains Mono',monospace;white-space:nowrap;
-  align-self:flex-end;margin-bottom:2px;
-}
 </style>
 </head>
 <body>
@@ -232,29 +213,11 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
     <div class="header-title">SSE-B2B <em>Installation GM</em> Analysis Report</div>
     <div class="header-sub">B2B Solar Installation · Performance Dashboard · <span id="lastUpdated">Loading…</span></div>
   </div>
-  <div class="header-right" style="gap:12px;align-items:flex-end;">
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <label style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;">From</label>
-      <select id="filterFrom" onchange="applyFilters()" class="hdr-select">
-        <option value="">All</option>
-      </select>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <label style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;">To</label>
-      <select id="filterTo" onchange="applyFilters()" class="hdr-select">
-        <option value="">All</option>
-      </select>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <label style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;">City</label>
-      <select id="filterCity" onchange="applyFilters()" class="hdr-select" style="min-width:130px;">
-        <option value="All">All Cities</option>
-      </select>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <button class="refresh-btn" onclick="resetFilters()" style="margin-bottom:3px;">✕ Reset</button>
-      <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
-    </div>
+  <div class="header-right">
+    <div class="dbadge" id="dateRangeBadge">📅 Loading…</div>
+    <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
+    <div class="fpill on" data-city="All">All Cities</div>
+    <div id="cityPills"></div>
   </div>
 </div>
 
@@ -445,6 +408,7 @@ let sparkCityInst  = null;
 let sparkTATInst   = null;
 
 let allRows        = [];   // full parsed data
+let activeCity     = "All";
 
 // Parse a number safely (handles commas, ₹ signs, empty strings)
 function num(v) {
@@ -499,27 +463,13 @@ function monthSortKey(m) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  FETCH + PARSE  (tries direct first, then CORS proxy)
+//  FETCH + PARSE
 // ════════════════════════════════════════════════════════════
 async function fetchSheetData() {
-  const url = CONFIG.SHEET_URL + "&cachebust=" + Date.now();
-
-  // Try direct fetch first (works on GitHub Pages / local)
-  try {
-    const resp = await fetch(url);
-    if (resp.ok) {
-      const text = await resp.text();
-      const rows = parseCSV(text);
-      if (rows.length) return rows;
-    }
-  } catch(e) { /* fall through to proxy */ }
-
-  // Fallback: CORS proxy (works in sandboxed iframes like Claude preview)
-  const proxy = "https://corsproxy.io/?" + encodeURIComponent(CONFIG.SHEET_URL);
-  const resp2 = await fetch(proxy);
-  if (!resp2.ok) throw new Error("HTTP " + resp2.status + " (via proxy)");
-  const text2 = await resp2.text();
-  return parseCSV(text2);
+  const resp = await fetch(CONFIG.SHEET_URL + "&cachebust=" + Date.now());
+  if (!resp.ok) throw new Error("HTTP " + resp.status);
+  const text = await resp.text();
+  return parseCSV(text);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -919,87 +869,31 @@ function renderAnalytics(m) {
   });
 }
 
+function renderCityPills(cities) {
+  const container = document.getElementById('cityPills');
+  container.innerHTML = cities.slice(0, 6).map(c =>
+    `<div class="fpill" data-city="${c}" onclick="filterCity('${c}')">${c}</div>`
+  ).join('');
+}
+
 function renderHeader(m) {
   const now = new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   document.getElementById('lastUpdated').textContent = "Updated " + now;
+  if (m.minDate && m.maxDate) {
+    const fmt = d => d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    document.getElementById('dateRangeBadge').textContent = "📅 " + fmt(m.minDate) + " → " + fmt(m.maxDate);
+  }
 }
 
 // ════════════════════════════════════════════════════════════
-//  POPULATE FILTER DROPDOWNS
+//  CITY FILTER
 // ════════════════════════════════════════════════════════════
-function populateFilters(rows) {
-  const C = CONFIG;
-
-  // Collect all unique installed months (sorted chronologically)
-  const monthSet = new Set();
-  rows.forEach(r => {
-    const raw = r[C.COL_MONTH] || r[C.COL_BOOKING_MONTH];
-    if (raw) monthSet.add(normaliseMonth(raw));
+function filterCity(city) {
+  activeCity = city;
+  document.querySelectorAll('.fpill').forEach(p => {
+    p.classList.toggle('on', p.dataset.city === city);
   });
-  const sortedMonths = [...monthSet].filter(m => m !== 'Unknown')
-    .sort((a, b) => monthSortKey(a) - monthSortKey(b)); // oldest → newest
-
-  const fromSel = document.getElementById('filterFrom');
-  const toSel   = document.getElementById('filterTo');
-  // Save current values
-  const prevFrom = fromSel.value;
-  const prevTo   = toSel.value;
-  fromSel.innerHTML = '<option value="">Earliest</option>';
-  toSel.innerHTML   = '<option value="">Latest</option>';
-  sortedMonths.forEach(m => {
-    fromSel.innerHTML += `<option value="${m}">${m}</option>`;
-    toSel.innerHTML   += `<option value="${m}">${m}</option>`;
-  });
-  // Restore values if still valid
-  if (prevFrom && sortedMonths.includes(prevFrom)) fromSel.value = prevFrom;
-  if (prevTo   && sortedMonths.includes(prevTo))   toSel.value   = prevTo;
-
-  // City dropdown
-  const citySet = new Set(['All']);
-  rows.forEach(r => { if (r[C.COL_CITY]) citySet.add(r[C.COL_CITY]); });
-  const cities = [...citySet];
-  const citySel = document.getElementById('filterCity');
-  const prevCity = citySel.value;
-  citySel.innerHTML = '';
-  cities.forEach(c => {
-    citySel.innerHTML += `<option value="${c}">${c === 'All' ? 'All Cities' : c}</option>`;
-  });
-  if (prevCity && cities.includes(prevCity)) citySel.value = prevCity;
-}
-
-// ════════════════════════════════════════════════════════════
-//  APPLY FILTERS
-// ════════════════════════════════════════════════════════════
-function applyFilters() {
-  const C        = CONFIG;
-  const fromVal  = document.getElementById('filterFrom').value;  // e.g. "Apr 2025" or ""
-  const toVal    = document.getElementById('filterTo').value;
-  const cityVal  = document.getElementById('filterCity').value;
-
-  const fromTs = fromVal ? monthSortKey(fromVal) : -Infinity;
-  const toTs   = toVal   ? monthSortKey(toVal)   :  Infinity;
-
-  let filtered = allRows.filter(r => {
-    // City filter
-    if (cityVal && cityVal !== 'All' && r[C.COL_CITY] !== cityVal) return false;
-    // Month filter — based on Installed Month column
-    const raw = r[C.COL_MONTH] || r[C.COL_BOOKING_MONTH];
-    if (fromVal || toVal) {
-      const m   = normaliseMonth(raw);
-      const ts  = monthSortKey(m);
-      if (ts < fromTs || ts > toTs) return false;
-    }
-    return true;
-  });
-
-  // Show active filter badge in subtitle
-  const parts = [];
-  if (fromVal || toVal) parts.push((fromVal || 'Start') + ' → ' + (toVal || 'Latest'));
-  if (cityVal && cityVal !== 'All') parts.push(cityVal);
-  const sub = document.getElementById('lastUpdated');
-  const now = new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  sub.textContent = parts.length ? `Filtered: ${parts.join(' · ')}` : `Updated ${now}`;
-
+  const filtered = city === "All" ? allRows : allRows.filter(r => r[CONFIG.COL_CITY] === city);
   const m = compute(filtered);
   renderKPIs(m);
   renderBarChart(m);
@@ -1010,29 +904,29 @@ function applyFilters() {
   renderAnalytics(m);
 }
 
-function resetFilters() {
-  document.getElementById('filterFrom').value = '';
-  document.getElementById('filterTo').value   = '';
-  document.getElementById('filterCity').value = 'All';
-  applyFilters();
-}
+// Make "All Cities" pill work
+document.querySelector('.fpill[data-city="All"]').addEventListener('click', () => filterCity("All"));
 
 // ════════════════════════════════════════════════════════════
 //  MAIN INIT
 // ════════════════════════════════════════════════════════════
 async function initDashboard() {
-  const overlay   = document.getElementById('loadingOverlay');
+  const overlay = document.getElementById('loadingOverlay');
   const errBanner = document.getElementById('errorBanner');
   overlay.classList.remove('hidden');
   errBanner.style.display = 'none';
 
   try {
     allRows = await fetchSheetData();
+
     if (!allRows.length) throw new Error("No rows returned from sheet");
 
-    populateFilters(allRows);
-
     const m = compute(allRows);
+
+    // Build city pills from data
+    const allCities = [...new Set(allRows.map(r => r[CONFIG.COL_CITY]).filter(Boolean))];
+    renderCityPills(allCities);
+
     renderHeader(m);
     renderKPIs(m);
     renderBarChart(m);
