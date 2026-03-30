@@ -55,17 +55,55 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .header-title{color:#fff;font-size:18px;font-weight:900;letter-spacing:.3px;line-height:1.25;}
 .header-title em{color:var(--sky2);font-style:normal;}
 .header-sub{color:var(--sky3);font-size:10.5px;font-weight:700;letter-spacing:.8px;margin-top:3px;text-transform:uppercase;}
-.header-right{padding:14px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
-.fpill{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.18);border-radius:20px;
-  padding:5px 13px;font-size:11px;font-weight:800;color:rgba(255,255,255,.7);
-  cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;}
-.fpill:hover{background:rgba(41,182,246,.25);border-color:var(--sky2);color:#fff;}
-.fpill.on{background:var(--sky2);border-color:var(--sky2);color:var(--navy);}
+.header-right{padding:14px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+
+/* ─── FILTER DROPDOWNS ─── */
+.filter-group{display:flex;align-items:center;gap:6px;}
+.filter-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap;}
+.filter-select{
+  background:rgba(255,255,255,.1);
+  border:1.5px solid rgba(255,255,255,.2);
+  border-radius:8px;
+  padding:6px 28px 6px 11px;
+  font-size:11px;font-weight:800;
+  color:#fff;
+  font-family:'Nunito',sans-serif;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  outline:none;
+  transition:all .2s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.6)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 9px center;
+  min-width:110px;
+}
+.filter-select:hover{background-color:rgba(41,182,246,.2);border-color:var(--sky2);}
+.filter-select option{background:#1a237e;color:#fff;font-weight:700;}
+
+.filter-date-input{
+  background:rgba(255,255,255,.1);
+  border:1.5px solid rgba(255,255,255,.2);
+  border-radius:8px;
+  padding:6px 10px;
+  font-size:11px;font-weight:700;
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  cursor:pointer;
+  outline:none;
+  transition:all .2s;
+  width:122px;
+}
+.filter-date-input:hover{background-color:rgba(41,182,246,.2);border-color:var(--sky2);}
+.filter-date-input::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.6);cursor:pointer;}
+
+.filter-sep{width:1px;height:28px;background:rgba(255,255,255,.15);margin:0 4px;}
+
 .dbadge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
   border-radius:8px;padding:5px 12px;font-size:10px;font-weight:700;
   font-family:'JetBrains Mono',monospace;color:var(--sky3);white-space:nowrap;}
 .refresh-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);
-  border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:#fff;
+  border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;color:#fff;
   cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;}
 .refresh-btn:hover{background:rgba(255,255,255,.22);}
 
@@ -148,7 +186,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .clbl{font-family:'Nunito',sans-serif!important;font-weight:700;}
 .dp{color:var(--green)!important;font-weight:800;}
 .dn{color:var(--red)!important;font-weight:800;}
-.tbar{display:inline-block;height:4px;border-radius:2px;vertical-align:middle;margin-right:4px;opacity:.75;}
 
 /* ─── ANALYTICS ─── */
 .ana-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
@@ -215,9 +252,28 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
   <div class="header-right">
     <div class="dbadge" id="dateRangeBadge">📅 Loading…</div>
+
+    <!-- City Dropdown -->
+    <div class="filter-group">
+      <span class="filter-label">City</span>
+      <select class="filter-select" id="cityDropdown" onchange="applyFilters()">
+        <option value="All">All Cities</option>
+      </select>
+    </div>
+
+    <div class="filter-sep"></div>
+
+    <!-- Date Range Filter -->
+    <div class="filter-group">
+      <span class="filter-label">From</span>
+      <input type="date" class="filter-date-input" id="dateFrom" onchange="applyFilters()">
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">To</span>
+      <input type="date" class="filter-date-input" id="dateTo" onchange="applyFilters()">
+    </div>
+
     <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
-    <div class="fpill on" data-city="All">All Cities</div>
-    <div id="cityPills"></div>
   </div>
 </div>
 
@@ -361,13 +417,10 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 
 <script>
 // ════════════════════════════════════════════════════════════
-//  ⚙️  CONFIGURATION — update these to match your sheet
+//  ⚙️  CONFIGURATION
 // ════════════════════════════════════════════════════════════
 const CONFIG = {
-  // ✅ Your published Google Sheet CSV URL
   SHEET_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQmnTI4dwwY2KuhEk-jNub-Xlbw8tC3Xg3IVKq-1DG3D3WE0eGHkihOU1nVwSPYacVPTSdxX543IZq/pub?gid=0&single=true&output=csv",
-
-  // ── Column names — matched exactly to your sheet headers ──
   COL_LEAD:       "Lead Name",
   COL_STATUS:     "Installation Status",
   COL_REVENUE:    "Revenue",
@@ -375,21 +428,17 @@ const CONFIG = {
   COL_BOOK_GM:    "New Booking GM ₹",
   COL_DESIGN_GM:  "Design GM ₹",
   COL_CITY:       "City",
-  COL_MONTH:      "Installed Month",   // month of installation completion
-  COL_BOOKING_MONTH: "Booking Month/Date", // booking month for reference
-  COL_SIZE:       "Size",              // kW size column
-  COL_SEGMENT:    "BD",                // BD = Business Dev / segment type
-  COL_TAT:        "",                  // no TAT column found — set to "" to skip
-
-  // ── Extra GM columns available in your sheet ──
+  COL_MONTH:      "Installed Month",
+  COL_BOOKING_MONTH: "Booking Month/Date",
+  COL_SIZE:       "Size",
+  COL_SEGMENT:    "BD",
+  COL_TAT:        "",
   COL_BOOKING_GM_PCT:  "Booking GM %",
   COL_NEW_BOOKING_GM:  "New Booking GM %",
   COL_DESIGN_GM_PCT:   "Design GM %",
   COL_INST_GM_PCT:     "Installation GM %",
   COL_PROC_GM_PCT:     "Procurement GM %",
-  COL_SIZE_BRACKET:    "Size Bracket",  // (A) 0-30 / (B) 30-100 / (C) >100
-
-  // ── Status filter ──
+  COL_SIZE_BRACKET:    "Size Bracket",
   DONE_STATUS: "Installation Complete",
 };
 
@@ -407,26 +456,21 @@ let sparkMonthInst = null;
 let sparkCityInst  = null;
 let sparkTATInst   = null;
 
-let allRows        = [];   // full parsed data
-let activeCity     = "All";
+let allRows = [];
 
-// Parse a number safely (handles commas, ₹ signs, empty strings)
 function num(v) {
   if (v === undefined || v === null || v === "") return 0;
   return parseFloat(String(v).replace(/[^0-9.\-]/g, "")) || 0;
 }
 
-// Format crore
 function fmtCr(v) {
   const cr = v / 1e7;
   return cr >= 1 ? cr.toFixed(2) + " Cr" : (v / 1e5).toFixed(2) + " L";
 }
 
-// Parse CSV text to array of objects
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) return [];
-  // Handle quoted fields
   const splitLine = line => {
     const res = []; let cur = ""; let inQ = false;
     for (let i = 0; i < line.length; i++) {
@@ -445,25 +489,32 @@ function parseCSV(text) {
   }).filter(r => Object.values(r).some(v => v !== ""));
 }
 
-// Normalise month string: tries to produce "Mon YYYY"
 function normaliseMonth(raw) {
   if (!raw) return "Unknown";
-  // Already like "Nov 2025"
   if (/^[A-Za-z]{3}\s+\d{4}$/.test(raw.trim())) return raw.trim();
-  // Try date parse
   const d = new Date(raw);
   if (!isNaN(d)) return d.toLocaleString('en-IN', {month:'short', year:'numeric'});
   return raw.trim();
 }
 
-// Month sort order helper
 function monthSortKey(m) {
   const d = new Date("1 " + m);
   return isNaN(d) ? 0 : d.getTime();
 }
 
+// Parse an installed month string into a JS Date (for date range filtering)
+function parseInstalledDate(raw) {
+  if (!raw) return null;
+  const d = new Date(raw);
+  if (!isNaN(d)) return d;
+  // Try "Nov 2025" format
+  const d2 = new Date("1 " + raw);
+  if (!isNaN(d2)) return d2;
+  return null;
+}
+
 // ════════════════════════════════════════════════════════════
-//  FETCH + PARSE
+//  FETCH
 // ════════════════════════════════════════════════════════════
 async function fetchSheetData() {
   const resp = await fetch(CONFIG.SHEET_URL + "&cachebust=" + Date.now());
@@ -473,7 +524,81 @@ async function fetchSheetData() {
 }
 
 // ════════════════════════════════════════════════════════════
-//  COMPUTE METRICS from a filtered row set
+//  GET ACTIVE FILTERS
+// ════════════════════════════════════════════════════════════
+function getFilteredRows() {
+  const city     = document.getElementById('cityDropdown').value;
+  const dateFrom = document.getElementById('dateFrom').value;   // "YYYY-MM-DD" or ""
+  const dateTo   = document.getElementById('dateTo').value;
+
+  return allRows.filter(r => {
+    // City filter
+    if (city !== "All" && r[CONFIG.COL_CITY] !== city) return false;
+
+    // Date range filter (based on Installed Month column)
+    if (dateFrom || dateTo) {
+      const raw = r[CONFIG.COL_MONTH] || r[CONFIG.COL_BOOKING_MONTH];
+      const d   = parseInstalledDate(raw);
+      if (!d) return false;
+      if (dateFrom && d < new Date(dateFrom)) return false;
+      if (dateTo   && d > new Date(dateTo + "T23:59:59")) return false;
+    }
+
+    return true;
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  APPLY FILTERS (called on every filter change)
+// ════════════════════════════════════════════════════════════
+function applyFilters() {
+  const filtered = getFilteredRows();
+  const m = compute(filtered);
+  renderKPIs(m);
+  renderBarChart(m);
+  renderDonut(m);
+  renderSegments(m);
+  renderMonthlyTable(m);
+  renderCityTable(m);
+  renderAnalytics(m);
+}
+
+// ════════════════════════════════════════════════════════════
+//  POPULATE CITY DROPDOWN from data
+// ════════════════════════════════════════════════════════════
+function populateCityDropdown(cities) {
+  const sel = document.getElementById('cityDropdown');
+  // Keep "All Cities" first option
+  sel.innerHTML = '<option value="All">All Cities</option>';
+  cities.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  POPULATE DATE RANGE defaults from data
+// ════════════════════════════════════════════════════════════
+function populateDateDefaults(rows) {
+  const dates = rows.map(r => {
+    const raw = r[CONFIG.COL_MONTH] || r[CONFIG.COL_BOOKING_MONTH];
+    return parseInstalledDate(raw);
+  }).filter(Boolean);
+
+  if (!dates.length) return;
+  const minD = new Date(Math.min(...dates));
+  const maxD = new Date(Math.max(...dates));
+
+  // Format to YYYY-MM-DD for input[type=date]
+  const fmt = d => d.toISOString().split('T')[0];
+  document.getElementById('dateFrom').value = fmt(minD);
+  document.getElementById('dateTo').value   = fmt(maxD);
+}
+
+// ════════════════════════════════════════════════════════════
+//  COMPUTE METRICS
 // ════════════════════════════════════════════════════════════
 function compute(rows) {
   const C = CONFIG;
@@ -491,9 +616,8 @@ function compute(rows) {
   const instGMPct   = revenue ? (instGMSum  / revenue * 100) : 0;
   const bookGMPct   = revenue ? (bookGMSum  / revenue * 100) : 0;
   const designGMPct = revenue ? (designGMSum/ revenue * 100) : 0;
-  const delta       = bookGMPct - instGMPct;
 
-  // ── By Month (using Installed Month column) ──
+  // ── By Month ──
   const monthMap = {};
   completed.forEach(r => {
     const m = normaliseMonth(r[C.COL_MONTH] || r[C.COL_BOOKING_MONTH]);
@@ -504,7 +628,7 @@ function compute(rows) {
     monthMap[m].bookGM += num(r[C.COL_BOOK_GM]);
     if (C.COL_TAT && r[C.COL_TAT]) { monthMap[m].tatSum += num(r[C.COL_TAT]); monthMap[m].tatCount++; }
   });
-  const months = Object.keys(monthMap).sort((a,b) => monthSortKey(b) - monthSortKey(a)); // newest first
+  const months = Object.keys(monthMap).sort((a,b) => monthSortKey(b) - monthSortKey(a));
 
   // ── By City ──
   const cityMap = {};
@@ -519,7 +643,7 @@ function compute(rows) {
   });
   const cities = Object.keys(cityMap).sort((a,b) => cityMap[b].leads.size - cityMap[a].leads.size);
 
-  // ── Size segments — use Size Bracket column (pre-computed in sheet) ──
+  // ── Size segments ──
   let sizeA = 0, sizeB = 0, sizeC = 0;
   completed.forEach(r => {
     const b = (r[C.COL_SIZE_BRACKET] || "").toUpperCase();
@@ -535,7 +659,7 @@ function compute(rows) {
   });
   const sizeTotal = sizeA + sizeB + sizeC || 1;
 
-  // ── Segments — use BD column ──
+  // ── Segments ──
   const segMap = {};
   completed.forEach(r => {
     const s = r[C.COL_SEGMENT] || "Other";
@@ -551,7 +675,7 @@ function compute(rows) {
 
   return {
     totalProjects, instCompleted, revenue,
-    instGMPct, bookGMPct, designGMPct, delta,
+    instGMPct, bookGMPct, designGMPct,
     months, monthMap, cities, cityMap,
     sizeA, sizeB, sizeC, sizeTotal,
     segments, segTotal,
@@ -708,16 +832,14 @@ function renderMonthlyTable(m) {
     const delta = (parseFloat(bookP) - parseFloat(instP)).toFixed(2);
     const dCls  = parseFloat(delta) >= 0 ? "dp" : "dn";
     const dTxt  = parseFloat(delta) >= 0 ? "+" + delta : delta;
-    const leads = d.leads.size;
     return `<tr>
       <td class="clbl">${mo}</td>
-      <td>${leads}</td>
+      <td>${d.leads.size}</td>
       <td>${instP}%</td>
       <td>${bookP}%</td>
       <td class="${dCls}">${dTxt}%</td>
     </tr>`;
   }).join('');
-  // totals row
   const totRev  = m.months.reduce((s,mo) => s + m.monthMap[mo].rev, 0);
   const totInst = m.months.reduce((s,mo) => s + m.monthMap[mo].instGM, 0);
   const totBook = m.months.reduce((s,mo) => s + m.monthMap[mo].bookGM, 0);
@@ -742,13 +864,9 @@ function renderCityTable(m) {
     const delta = (parseFloat(bookP) - parseFloat(instP)).toFixed(2);
     const dCls  = parseFloat(delta) >= 0 ? "dp" : "dn";
     const dTxt  = parseFloat(delta) >= 0 ? "+" + delta : delta;
-    const leads = d.leads.size;
-    const tat   = d.tatCount ? Math.round(d.tatSum/d.tatCount) : "—";
-    const tatColor = typeof tat === 'number' ? (tat > 190 ? '#d32f2f' : tat > 160 ? '#f57c00' : '#039be5') : '#aab4d8';
-    const tatWidth = typeof tat === 'number' ? Math.min(tat/3, 50) : 0;
     return `<tr>
       <td class="clbl">${city}</td>
-      <td>${leads}</td>
+      <td>${d.leads.size}</td>
       <td>${instP}%</td>
       <td>${bookP}%</td>
       <td class="${dCls}">${dTxt}%</td>
@@ -770,7 +888,6 @@ function renderCityTable(m) {
 }
 
 function renderAnalytics(m) {
-  // Best month
   let bestMo = null, bestPct = -Infinity;
   m.months.forEach(mo => {
     const d = m.monthMap[mo];
@@ -780,7 +897,6 @@ function renderAnalytics(m) {
   document.getElementById('bestMonth').textContent  = bestMo || "—";
   document.getElementById('bestMonthGM').textContent = bestMo ? "▲ " + bestPct.toFixed(2) + "% Installation GM" : "—";
 
-  // Top city
   let topC = null, topCPct = -Infinity;
   m.cities.forEach(c => {
     const d = m.cityMap[c];
@@ -791,7 +907,6 @@ function renderAnalytics(m) {
   document.getElementById('topCityGM').textContent = topC
     ? "▲ " + topCPct.toFixed(2) + "% GM · " + m.cityMap[topC].leads.size + " Projects" : "—";
 
-  // Avg TAT
   const allTATs = m.cities.map(c => {
     const d = m.cityMap[c];
     return d.tatCount ? d.tatSum/d.tatCount : null;
@@ -799,7 +914,6 @@ function renderAnalytics(m) {
   const avgTat = allTATs.length ? Math.round(allTATs.reduce((a,b)=>a+b,0)/allTATs.length) : "—";
   document.getElementById('avgTAT').textContent = avgTat;
 
-  // Worst TAT city
   let worstCity = null, worstVal = -Infinity;
   m.cities.forEach(c => {
     const d = m.cityMap[c];
@@ -809,8 +923,7 @@ function renderAnalytics(m) {
   document.getElementById('worstTAT').textContent = worstCity
     ? "▼ " + worstCity + " highest at " + Math.round(worstVal) + " days" : "—";
 
-  // Sparklines
-  const sparkMonths = [...m.months].reverse(); // oldest first for trend
+  const sparkMonths = [...m.months].reverse();
   const sparkInstData = sparkMonths.map(mo => {
     const d = m.monthMap[mo];
     return d.rev ? +(d.instGM/d.rev*100).toFixed(2) : 0;
@@ -869,13 +982,6 @@ function renderAnalytics(m) {
   });
 }
 
-function renderCityPills(cities) {
-  const container = document.getElementById('cityPills');
-  container.innerHTML = cities.slice(0, 6).map(c =>
-    `<div class="fpill" data-city="${c}" onclick="filterCity('${c}')">${c}</div>`
-  ).join('');
-}
-
 function renderHeader(m) {
   const now = new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   document.getElementById('lastUpdated').textContent = "Updated " + now;
@@ -886,47 +992,26 @@ function renderHeader(m) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  CITY FILTER
-// ════════════════════════════════════════════════════════════
-function filterCity(city) {
-  activeCity = city;
-  document.querySelectorAll('.fpill').forEach(p => {
-    p.classList.toggle('on', p.dataset.city === city);
-  });
-  const filtered = city === "All" ? allRows : allRows.filter(r => r[CONFIG.COL_CITY] === city);
-  const m = compute(filtered);
-  renderKPIs(m);
-  renderBarChart(m);
-  renderDonut(m);
-  renderSegments(m);
-  renderMonthlyTable(m);
-  renderCityTable(m);
-  renderAnalytics(m);
-}
-
-// Make "All Cities" pill work
-document.querySelector('.fpill[data-city="All"]').addEventListener('click', () => filterCity("All"));
-
-// ════════════════════════════════════════════════════════════
 //  MAIN INIT
 // ════════════════════════════════════════════════════════════
 async function initDashboard() {
-  const overlay = document.getElementById('loadingOverlay');
+  const overlay   = document.getElementById('loadingOverlay');
   const errBanner = document.getElementById('errorBanner');
   overlay.classList.remove('hidden');
   errBanner.style.display = 'none';
 
   try {
     allRows = await fetchSheetData();
-
     if (!allRows.length) throw new Error("No rows returned from sheet");
 
+    // Populate city dropdown from data
+    const allCities = [...new Set(allRows.map(r => r[CONFIG.COL_CITY]).filter(Boolean))].sort();
+    populateCityDropdown(allCities);
+
+    // Set default date range from data
+    populateDateDefaults(allRows);
+
     const m = compute(allRows);
-
-    // Build city pills from data
-    const allCities = [...new Set(allRows.map(r => r[CONFIG.COL_CITY]).filter(Boolean))];
-    renderCityPills(allCities);
-
     renderHeader(m);
     renderKPIs(m);
     renderBarChart(m);
