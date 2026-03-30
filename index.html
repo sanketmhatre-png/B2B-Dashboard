@@ -21,6 +21,24 @@
 }
 body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padding:18px 22px 30px;min-height:100vh;}
 
+/* ─── LOADING OVERLAY ─── */
+#loadingOverlay{
+  position:fixed;inset:0;background:rgba(238,242,251,.92);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;gap:14px;transition:opacity .4s;
+}
+#loadingOverlay.hidden{opacity:0;pointer-events:none;}
+.spinner{width:40px;height:40px;border:3px solid var(--border2);
+  border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
+.load-txt{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── ERROR BANNER ─── */
+#errorBanner{
+  display:none;background:#fff3e0;border:1.5px solid #ffb74d;border-radius:10px;
+  padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:700;color:#e65100;
+}
+
 /* ─── HEADER ─── */
 .header{
   background:linear-gradient(135deg,#0d1757 0%,var(--navy) 50%,#1565c0 100%);
@@ -37,7 +55,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .header-title{color:#fff;font-size:18px;font-weight:900;letter-spacing:.3px;line-height:1.25;}
 .header-title em{color:var(--sky2);font-style:normal;}
 .header-sub{color:var(--sky3);font-size:10.5px;font-weight:700;letter-spacing:.8px;margin-top:3px;text-transform:uppercase;}
-.header-right{padding:14px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.header-right{padding:14px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
 .fpill{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.18);border-radius:20px;
   padding:5px 13px;font-size:11px;font-weight:800;color:rgba(255,255,255,.7);
   cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;}
@@ -45,7 +63,11 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .fpill.on{background:var(--sky2);border-color:var(--sky2);color:var(--navy);}
 .dbadge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
   border-radius:8px;padding:5px 12px;font-size:10px;font-weight:700;
-  font-family:'JetBrains Mono',monospace;color:var(--sky3);}
+  font-family:'JetBrains Mono',monospace;color:var(--sky3);white-space:nowrap;}
+.refresh-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);
+  border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:#fff;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;}
+.refresh-btn:hover{background:rgba(255,255,255,.22);}
 
 /* ─── KPI ROW ─── */
 .kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;}
@@ -148,9 +170,40 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .kpi:nth-child(1){animation-delay:.04s}.kpi:nth-child(2){animation-delay:.08s}
 .kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.16s}
 .kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.24s}
+
+/* ─── HEADER SELECTS ─── */
+.hdr-select{
+  background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.22);
+  border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;
+  color:#fff;font-family:'Nunito',sans-serif;cursor:pointer;min-width:110px;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,.5)'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;
+  height:30px;
+}
+.hdr-select:hover{background-color:rgba(41,182,246,.25);border-color:var(--sky2);}
+.hdr-select option{background:#1a237e;color:#fff;font-weight:700;}
+.active-filter-badge{
+  background:rgba(41,182,246,.25);border:1.5px solid var(--sky2);
+  border-radius:8px;padding:4px 10px;font-size:9px;font-weight:800;
+  color:var(--sky2);font-family:'JetBrains Mono',monospace;white-space:nowrap;
+  align-self:flex-end;margin-bottom:2px;
+}
 </style>
 </head>
 <body>
+
+<!-- ═══ LOADING OVERLAY ═══ -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="load-txt">Fetching live data from Google Sheets…</div>
+</div>
+
+<!-- ═══ ERROR BANNER ═══ -->
+<div id="errorBanner">
+  ⚠️ Could not load live data. Please make sure your Google Sheet is published to web (File → Share → Publish to web → CSV).
+  Showing last loaded data or defaults.
+</div>
 
 <!-- ═══ HEADER ═══ -->
 <div class="header">
@@ -177,64 +230,78 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
   <div class="header-text">
     <div class="header-title">SSE-B2B <em>Installation GM</em> Analysis Report</div>
-    <div class="header-sub">B2B Solar Installation · Performance Dashboard</div>
+    <div class="header-sub">B2B Solar Installation · Performance Dashboard · <span id="lastUpdated">Loading…</span></div>
   </div>
-  <div class="header-right">
-    <div class="dbadge">📅 25-04-2025 → 25-11-2025</div>
-    <div class="fpill on">All Cities</div>
-    <div class="fpill">Pune</div>
-    <div class="fpill">Mumbai</div>
-    <div class="fpill">Bengaluru</div>
+  <div class="header-right" style="gap:12px;align-items:flex-end;">
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <label style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;">From</label>
+      <select id="filterFrom" onchange="applyFilters()" class="hdr-select">
+        <option value="">All</option>
+      </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <label style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;">To</label>
+      <select id="filterTo" onchange="applyFilters()" class="hdr-select">
+        <option value="">All</option>
+      </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <label style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;">City</label>
+      <select id="filterCity" onchange="applyFilters()" class="hdr-select" style="min-width:130px;">
+        <option value="All">All Cities</option>
+      </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <button class="refresh-btn" onclick="resetFilters()" style="margin-bottom:3px;">✕ Reset</button>
+      <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
+    </div>
   </div>
 </div>
 
 <!-- ═══ KPI ROW ═══ -->
 <div class="kpi-row">
-  <div class="kpi" style="animation-delay:.04s">
+  <div class="kpi">
     <div class="kpi-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div>
     <div class="kpi-lbl">Total Projects</div>
-    <div class="kpi-val" style="color:#1a237e">413</div>
+    <div class="kpi-val" id="kpiTotal" style="color:#1a237e">—</div>
     <div class="kpi-hint">All-time pipeline</div>
   </div>
-  <div class="kpi" style="animation-delay:.08s">
+  <div class="kpi">
     <div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#81d4fa)"></div>
     <div class="kpi-lbl">Installation Completed</div>
-    <div class="kpi-val" style="color:#039be5">124</div>
-    <div class="kpi-hint">30.0% completion rate</div>
-    <span class="kpi-badge bu">▲ 30%</span>
+    <div class="kpi-val" id="kpiCompleted" style="color:#039be5">—</div>
+    <div class="kpi-hint" id="kpiCompletedHint">—</div>
+    <span class="kpi-badge bu" id="kpiCompletedBadge"></span>
   </div>
-  <div class="kpi" style="animation-delay:.12s">
+  <div class="kpi">
     <div class="kpi-bar" style="background:linear-gradient(90deg,#f57c00,#ffd54f)"></div>
     <div class="kpi-lbl">Revenue</div>
-    <div class="kpi-val" style="color:#f57c00">3.85K</div>
+    <div class="kpi-val" id="kpiRevenue" style="color:#f57c00">—</div>
     <div class="kpi-hint">Crore (₹)</div>
   </div>
-  <div class="kpi" style="animation-delay:.16s">
+  <div class="kpi">
     <div class="kpi-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div>
     <div class="kpi-lbl">Installation GM</div>
-    <div class="kpi-val" style="color:#00897b">25.57%</div>
+    <div class="kpi-val" id="kpiInstGM" style="color:#00897b">—</div>
     <div class="kpi-hint">Gross margin</div>
-    <span class="kpi-badge bu">▲ 3.16%</span>
   </div>
-  <div class="kpi" style="animation-delay:.20s">
+  <div class="kpi">
     <div class="kpi-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div>
     <div class="kpi-lbl">Booking GM</div>
-    <div class="kpi-val" style="color:#7c4dff">28.73%</div>
-    <div class="kpi-hint">vs Installation delta</div>
-    <span class="kpi-badge bd">▼ 3.16%</span>
+    <div class="kpi-val" id="kpiBookGM" style="color:#7c4dff">—</div>
+    <div class="kpi-hint" id="kpiBookGMHint">vs Installation delta</div>
+    <span class="kpi-badge bd" id="kpiDeltaBadge"></span>
   </div>
-  <div class="kpi" style="animation-delay:.24s">
+  <div class="kpi">
     <div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#1a237e)"></div>
     <div class="kpi-lbl">Design GM</div>
-    <div class="kpi-val" style="color:#3949ab">26.15%</div>
+    <div class="kpi-val" id="kpiDesignGM" style="color:#3949ab">—</div>
     <div class="kpi-hint">Design margin</div>
   </div>
 </div>
 
 <!-- ═══ CHART + RIGHT PANEL ═══ -->
 <div class="sec-grid">
-
-  <!-- BAR CHART CARD -->
   <div class="card">
     <div class="ctitle">Booking VS Installation GM %</div>
     <div class="clegend">
@@ -245,103 +312,58 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       <canvas id="barChart"></canvas>
     </div>
   </div>
-
-  <!-- RIGHT PANEL -->
   <div class="rp">
-    <!-- SIZE WISE DONUT -->
     <div class="card">
       <div class="ctitle">Size Wise GM</div>
       <div class="donut-wrap">
         <div class="donut-canvas">
           <canvas id="sizeDonut" width="120" height="120"></canvas>
           <div class="donut-mid">
-            <div class="donut-mid-val">3</div>
+            <div class="donut-mid-val" id="donutMidVal">3</div>
             <div class="donut-mid-lbl">SEGMENTS</div>
           </div>
         </div>
-        <div class="donut-leg">
+        <div class="donut-leg" id="donutLeg">
           <div class="dl-row">
             <div class="dl-left"><div class="dl-dot" style="background:#1a237e"></div>(A) 0–30</div>
-            <div class="dl-pct" style="color:#1a237e">40.02%</div>
+            <div class="dl-pct" id="sizeA" style="color:#1a237e">—</div>
           </div>
           <div class="dl-row">
             <div class="dl-left"><div class="dl-dot" style="background:#29b6f6"></div>(B) 30–100</div>
-            <div class="dl-pct" style="color:#039be5">37.91%</div>
+            <div class="dl-pct" id="sizeB" style="color:#039be5">—</div>
           </div>
           <div class="dl-row">
             <div class="dl-left"><div class="dl-dot" style="background:#f57c00"></div>(C) &gt;100</div>
-            <div class="dl-pct" style="color:#f57c00">22.07%</div>
+            <div class="dl-pct" id="sizeC" style="color:#f57c00">—</div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- SEGMENT TYPE -->
     <div class="card">
       <div class="ctitle">Segment Type</div>
-      <div class="segs">
-        <div>
-          <div class="seg-hd"><span class="seg-nm">C&amp;I</span><span style="color:#1a237e">48.44%</span></div>
-          <div class="seg-bg"><div class="seg-fill" style="width:48.44%;background:linear-gradient(90deg,#1a237e,#3949ab)"></div></div>
-        </div>
-        <div>
-          <div class="seg-hd"><span class="seg-nm">CHS</span><span style="color:#039be5">23.63%</span></div>
-          <div class="seg-bg"><div class="seg-fill" style="width:23.63%;background:linear-gradient(90deg,#039be5,#81d4fa)"></div></div>
-        </div>
-        <div>
-          <div class="seg-hd"><span class="seg-nm">S C&amp;I</span><span style="color:#00897b">15.2%</span></div>
-          <div class="seg-bg"><div class="seg-fill" style="width:15.2%;background:linear-gradient(90deg,#00897b,#4db6ac)"></div></div>
-        </div>
-        <div>
-          <div class="seg-hd"><span class="seg-nm">Large</span><span style="color:#7c4dff">12.73%</span></div>
-          <div class="seg-bg"><div class="seg-fill" style="width:12.73%;background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div></div>
-        </div>
-      </div>
+      <div class="segs" id="segmentBars"></div>
     </div>
   </div>
-
 </div>
 
 <!-- ═══ TABLES ═══ -->
 <div class="tbl-grid">
-  <!-- MONTHLY -->
   <div class="card">
     <div class="ctitle">Monthly Performance Breakdown</div>
     <table class="dtbl">
       <thead><tr>
-        <th>Month</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th>
+        <th>Month</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th>
       </tr></thead>
-      <tbody>
-        <tr><td class="clbl">Nov 2025</td><td>30</td><td>26.18%</td><td>30.16%</td><td class="dn">-3.98%</td><td><span class="tbar" style="width:37px;background:#039be5"></span>187</td></tr>
-        <tr><td class="clbl">Sep 2025</td><td>23</td><td>27.45%</td><td>29.15%</td><td class="dp">+1.70%</td><td><span class="tbar" style="width:36px;background:#1a237e"></span>181</td></tr>
-        <tr><td class="clbl">Aug 2025</td><td>33</td><td>23.95%</td><td>28.17%</td><td class="dp">+4.22%</td><td><span class="tbar" style="width:38px;background:#039be5"></span>189</td></tr>
-        <tr><td class="clbl">Jul 2025</td><td>13</td><td>21.78%</td><td>26.40%</td><td class="dp">+4.62%</td><td><span class="tbar" style="width:29px;background:#1a237e"></span>147</td></tr>
-        <tr><td class="clbl">Jun 2025</td><td>4</td><td>31.51%</td><td>31.97%</td><td class="dp">+0.47%</td><td><span class="tbar" style="width:27px;background:#1a237e"></span>137</td></tr>
-        <tr><td class="clbl">May 2025</td><td>11</td><td>34.46%</td><td>30.55%</td><td class="dn">-3.91%</td><td><span class="tbar" style="width:26px;background:#1a237e"></span>132</td></tr>
-        <tr><td class="clbl">Apr 2025</td><td>10</td><td>23.13%</td><td>26.59%</td><td class="dp">+3.47%</td><td><span class="tbar" style="width:29px;background:#1a237e"></span>146</td></tr>
-        <tr class="tr-tot"><td>TOTAL</td><td>124</td><td>25.57%</td><td>28.73%</td><td>3.16%</td><td>172</td></tr>
-      </tbody>
+      <tbody id="monthlyTbody"></tbody>
     </table>
   </div>
-  <!-- CITY -->
   <div class="card">
     <div class="ctitle">City-Wise Performance</div>
     <table class="dtbl">
       <thead><tr>
-        <th>City</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th>
+        <th>City</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th>
       </tr></thead>
-      <tbody>
-        <tr><td class="clbl">Pune</td><td>58</td><td>27.65%</td><td>28.61%</td><td class="dp">+0.96%</td><td><span class="tbar" style="width:31px;background:#1a237e"></span>157</td></tr>
-        <tr><td class="clbl">Mumbai</td><td>35</td><td>21.33%</td><td>28.46%</td><td class="dp">+7.13%</td><td><span class="tbar" style="width:42px;background:#d32f2f"></span>213</td></tr>
-        <tr><td class="clbl">Navi Mumbai</td><td>9</td><td>37.59%</td><td>35.68%</td><td class="dn">-1.91%</td><td><span class="tbar" style="width:27px;background:#00897b"></span>135</td></tr>
-        <tr><td class="clbl">Bengaluru</td><td>8</td><td>19.92%</td><td>27.22%</td><td class="dp">+7.29%</td><td><span class="tbar" style="width:38px;background:#d32f2f"></span>189</td></tr>
-        <tr><td class="clbl">Thane</td><td>5</td><td>33.03%</td><td>27.85%</td><td class="dn">-5.18%</td><td><span class="tbar" style="width:26px;background:#00897b"></span>131</td></tr>
-        <tr><td class="clbl">MP</td><td>3</td><td>33.44%</td><td>27.45%</td><td class="dn">-5.99%</td><td><span class="tbar" style="width:30px;background:#f57c00"></span>151</td></tr>
-        <tr><td class="clbl">Other</td><td>2</td><td>46.08%</td><td>39.79%</td><td class="dn">-6.29%</td><td><span class="tbar" style="width:23px;background:#00897b"></span>116</td></tr>
-        <tr><td class="clbl">Indore</td><td>1</td><td>35.98%</td><td>34.66%</td><td class="dn">-1.32%</td><td><span class="tbar" style="width:35px;background:#f57c00"></span>177</td></tr>
-        <tr><td class="clbl">Khandala</td><td>1</td><td>39.10%</td><td>27.78%</td><td class="dn">-11.32%</td><td><span class="tbar" style="width:36px;background:#d32f2f"></span>183</td></tr>
-        <tr class="tr-tot"><td>TOTAL</td><td>124</td><td>25.57%</td><td>28.73%</td><td>3.16%</td><td>172</td></tr>
-      </tbody>
+      <tbody id="cityTbody"></tbody>
     </table>
   </div>
 </div>
@@ -350,224 +372,687 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 <div class="ana-grid">
   <div class="mini">
     <div class="mini-t">Best Performing Month</div>
-    <div class="mini-v" style="color:#00897b">May 2025</div>
-    <div class="mini-c up">▲ 34.46% Installation GM</div>
+    <div class="mini-v" id="bestMonth" style="color:#00897b">—</div>
+    <div class="mini-c up" id="bestMonthGM">—</div>
     <div class="mini-d">Highest margin in the period</div>
     <canvas id="sparkMonth" height="46" style="margin-top:12px"></canvas>
   </div>
   <div class="mini">
     <div class="mini-t">Top City by Install GM%</div>
-    <div class="mini-v" style="color:#1a237e">Other</div>
-    <div class="mini-c up">▲ 46.08% GM · 2 Projects</div>
+    <div class="mini-v" id="topCity" style="color:#1a237e">—</div>
+    <div class="mini-c up" id="topCityGM">—</div>
     <div class="mini-d">Highest installation margin city</div>
     <canvas id="sparkCity" height="46" style="margin-top:12px"></canvas>
   </div>
   <div class="mini">
     <div class="mini-t">Avg TAT Days by City</div>
-    <div class="mini-v" style="color:#039be5">172</div>
-    <div class="mini-c dn">▼ Mumbai highest at 213 days</div>
+    <div class="mini-v" id="avgTAT" style="color:#039be5">—</div>
+    <div class="mini-c dn" id="worstTAT">—</div>
     <div class="mini-d">Green &lt;160 · Amber 160–190 · Red &gt;190</div>
     <canvas id="sparkTAT" height="46" style="margin-top:12px"></canvas>
   </div>
 </div>
 
 <!-- ═══ FOOTER ═══ -->
-<div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; SSE-B2B INSTALLATION GM ANALYSIS &nbsp;|&nbsp; APR 2025 – NOV 2025 &nbsp;|&nbsp; CONFIDENTIAL</div>
+<div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; SSE-B2B INSTALLATION GM ANALYSIS &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
 
 <script>
-// ─── Global Defaults ───────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+//  ⚙️  CONFIGURATION — update these to match your sheet
+// ════════════════════════════════════════════════════════════
+const CONFIG = {
+  // ✅ Your published Google Sheet CSV URL
+  SHEET_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQmnTI4dwwY2KuhEk-jNub-Xlbw8tC3Xg3IVKq-1DG3D3WE0eGHkihOU1nVwSPYacVPTSdxX543IZq/pub?gid=0&single=true&output=csv",
+
+  // ── Column names — matched exactly to your sheet headers ──
+  COL_LEAD:       "Lead Name",
+  COL_STATUS:     "Installation Status",
+  COL_REVENUE:    "Revenue",
+  COL_INST_GM:    "Installation GM ₹",
+  COL_BOOK_GM:    "New Booking GM ₹",
+  COL_DESIGN_GM:  "Design GM ₹",
+  COL_CITY:       "City",
+  COL_MONTH:      "Installed Month",   // month of installation completion
+  COL_BOOKING_MONTH: "Booking Month/Date", // booking month for reference
+  COL_SIZE:       "Size",              // kW size column
+  COL_SEGMENT:    "BD",                // BD = Business Dev / segment type
+  COL_TAT:        "",                  // no TAT column found — set to "" to skip
+
+  // ── Extra GM columns available in your sheet ──
+  COL_BOOKING_GM_PCT:  "Booking GM %",
+  COL_NEW_BOOKING_GM:  "New Booking GM %",
+  COL_DESIGN_GM_PCT:   "Design GM %",
+  COL_INST_GM_PCT:     "Installation GM %",
+  COL_PROC_GM_PCT:     "Procurement GM %",
+  COL_SIZE_BRACKET:    "Size Bracket",  // (A) 0-30 / (B) 30-100 / (C) >100
+
+  // ── Status filter ──
+  DONE_STATUS: "Installation Complete",
+};
+
+// ════════════════════════════════════════════════════════════
+//  Helpers
+// ════════════════════════════════════════════════════════════
 Chart.defaults.font.family = "'Nunito', sans-serif";
 Chart.defaults.font.size   = 10;
 Chart.defaults.color       = '#6675b0';
 Chart.defaults.borderColor = '#dce4f8';
 
-// ─── Custom datalabels plugin ──────────────────────────────────────────────
-const labelPlugin = {
-  id:'topLabels',
-  afterDatasetsDraw(chart){
-    const {ctx} = chart;
-    chart.data.datasets.forEach((ds, di) => {
-      const meta = chart.getDatasetMeta(di);
-      if(meta.hidden) return;
-      meta.data.forEach((bar, i) => {
-        const val = ds.data[i];
-        const x   = bar.x;
-        const y   = bar.y - 5;
-        ctx.save();
-        ctx.font        = `800 9.5px 'Nunito', sans-serif`;
-        ctx.fillStyle   = di === 0 ? '#1a237e' : '#0277bd';
-        ctx.textAlign   = 'center';
-        ctx.textBaseline= 'bottom';
-        ctx.fillText(val + '%', x, y);
-        ctx.restore();
-      });
-    });
-  }
-};
+let barChartInst   = null;
+let sizeDonutInst  = null;
+let sparkMonthInst = null;
+let sparkCityInst  = null;
+let sparkTATInst   = null;
 
-// ─── MAIN BAR CHART ────────────────────────────────────────────────────────
-const months  = ['Nov 2025','Sep 2025','Aug 2025','Jul 2025','Jun 2025','May 2025','Apr 2025'];
-const instGM  = [26.18, 27.45, 23.95, 21.78, 31.51, 34.46, 23.13];
-const bookGM  = [30.16, 29.15, 28.17, 26.40, 31.97, 30.55, 26.59];
+let allRows        = [];   // full parsed data
 
-new Chart(document.getElementById('barChart'), {
-  type: 'bar',
-  plugins: [labelPlugin],
-  data: {
-    labels: months,
-    datasets: [
-      {
-        label: 'Installation GM %',
-        data: instGM,
-        backgroundColor: '#1a237e',
-        hoverBackgroundColor: '#283593',
-        borderRadius: { topLeft:5, topRight:5 },
-        borderSkipped: false,
-        barPercentage: 0.38,
-        categoryPercentage: 0.82,
-        order: 1
-      },
-      {
-        label: 'Booking GM %',
-        data: bookGM,
-        backgroundColor: '#81d4fa',
-        hoverBackgroundColor: '#29b6f6',
-        borderRadius: { topLeft:5, topRight:5 },
-        borderSkipped: false,
-        barPercentage: 0.38,
-        categoryPercentage: 0.82,
-        order: 2
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    layout: { padding: { top: 26, right: 10, left: 4, bottom: 4 } },
-    interaction: { mode:'index', intersect:false },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#fff',
-        borderColor: '#d8e2f8',
-        borderWidth: 1,
-        titleColor: '#1a237e',
-        bodyColor: '#3949ab',
-        padding: 12,
-        cornerRadius: 8,
-        callbacks: {
-          label: ctx => `  ${ctx.dataset.label}: ${ctx.raw}%`
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        border: { display: false },
-        ticks: {
-          color: '#6675b0',
-          font: { weight: '700', size: 10 },
-          maxRotation: 0
-        }
-      },
-      y: {
-        grid: { color: '#edf0fb', lineWidth: 1 },
-        border: { display: false, dash: [4,4] },
-        ticks: {
-          color: '#6675b0',
-          callback: v => v + '%',
-          font: { weight: '700', size: 10 },
-          stepSize: 5
-        },
-        min: 15,
-        max: 42
-      }
+// Parse a number safely (handles commas, ₹ signs, empty strings)
+function num(v) {
+  if (v === undefined || v === null || v === "") return 0;
+  return parseFloat(String(v).replace(/[^0-9.\-]/g, "")) || 0;
+}
+
+// Format crore
+function fmtCr(v) {
+  const cr = v / 1e7;
+  return cr >= 1 ? cr.toFixed(2) + " Cr" : (v / 1e5).toFixed(2) + " L";
+}
+
+// Parse CSV text to array of objects
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  // Handle quoted fields
+  const splitLine = line => {
+    const res = []; let cur = ""; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { res.push(cur.trim()); cur = ""; }
+      else cur += c;
     }
-  }
-});
+    res.push(cur.trim());
+    return res;
+  };
+  const headers = splitLine(lines[0]);
+  return lines.slice(1).map(l => {
+    const vals = splitLine(l);
+    return Object.fromEntries(headers.map((h, i) => [h.trim(), (vals[i] || "").trim()]));
+  }).filter(r => Object.values(r).some(v => v !== ""));
+}
 
-// ─── SIZE DONUT ────────────────────────────────────────────────────────────
-new Chart(document.getElementById('sizeDonut'), {
-  type: 'doughnut',
-  data: {
-    labels: ['(A) 0-30','(B) 30-100','(C) >100'],
-    datasets: [{
-      data: [40.02, 37.91, 22.07],
-      backgroundColor: ['#1a237e','#29b6f6','#f57c00'],
-      borderWidth: 3,
-      borderColor: '#fff',
-      hoverOffset: 6
-    }]
-  },
-  options: {
-    cutout: '66%',
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor:'#fff', borderColor:'#d8e2f8', borderWidth:1,
-        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` }
-      }
+// Normalise month string: tries to produce "Mon YYYY"
+function normaliseMonth(raw) {
+  if (!raw) return "Unknown";
+  // Already like "Nov 2025"
+  if (/^[A-Za-z]{3}\s+\d{4}$/.test(raw.trim())) return raw.trim();
+  // Try date parse
+  const d = new Date(raw);
+  if (!isNaN(d)) return d.toLocaleString('en-IN', {month:'short', year:'numeric'});
+  return raw.trim();
+}
+
+// Month sort order helper
+function monthSortKey(m) {
+  const d = new Date("1 " + m);
+  return isNaN(d) ? 0 : d.getTime();
+}
+
+// ════════════════════════════════════════════════════════════
+//  FETCH + PARSE  (tries direct first, then CORS proxy)
+// ════════════════════════════════════════════════════════════
+async function fetchSheetData() {
+  const url = CONFIG.SHEET_URL + "&cachebust=" + Date.now();
+
+  // Try direct fetch first (works on GitHub Pages / local)
+  try {
+    const resp = await fetch(url);
+    if (resp.ok) {
+      const text = await resp.text();
+      const rows = parseCSV(text);
+      if (rows.length) return rows;
     }
-  }
-});
+  } catch(e) { /* fall through to proxy */ }
 
-// ─── SPARKLINES ────────────────────────────────────────────────────────────
-new Chart(document.getElementById('sparkMonth'), {
-  type:'line',
-  data:{
-    labels:['Apr','May','Jun','Jul','Aug','Sep','Nov'],
-    datasets:[{
-      data:[23.13,34.46,31.51,21.78,23.95,27.45,26.18],
-      borderColor:'#00897b', borderWidth:2.5,
-      pointRadius:[2,5,2,2,2,2,2],
-      pointBackgroundColor:'#00897b',
-      fill:true, backgroundColor:'rgba(0,137,123,.09)', tension:.4
-    }]
-  },
-  options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
-    scales:{x:{display:false},y:{display:false}},animation:{duration:1400}}
-});
+  // Fallback: CORS proxy (works in sandboxed iframes like Claude preview)
+  const proxy = "https://corsproxy.io/?" + encodeURIComponent(CONFIG.SHEET_URL);
+  const resp2 = await fetch(proxy);
+  if (!resp2.ok) throw new Error("HTTP " + resp2.status + " (via proxy)");
+  const text2 = await resp2.text();
+  return parseCSV(text2);
+}
 
-new Chart(document.getElementById('sparkCity'), {
-  type:'bar',
-  data:{
-    labels:['Pune','Mum','NMum','Blr','Thane','MP','Other','Ind','Khal'],
-    datasets:[{
-      data:[27.65,21.33,37.59,19.92,33.03,33.44,46.08,35.98,39.10],
-      backgroundColor:['#1a237e','#d32f2f','#039be5','#d32f2f','#f57c00','#f57c00','#00897b','#3949ab','#3949ab'],
-      borderRadius:3
-    }]
-  },
-  options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
-    scales:{x:{display:false},y:{display:false,min:15}},animation:{duration:1400}}
-});
+// ════════════════════════════════════════════════════════════
+//  COMPUTE METRICS from a filtered row set
+// ════════════════════════════════════════════════════════════
+function compute(rows) {
+  const C = CONFIG;
+  const completed = rows.filter(r => r[C.COL_STATUS] === C.DONE_STATUS);
 
-new Chart(document.getElementById('sparkTAT'), {
-  type:'bar',
-  data:{
-    labels:['Pune','Mum','NMum','Blr','Thane','MP','Other','Ind','Khal'],
-    datasets:[{
-      data:[157,213,135,189,131,151,116,177,183],
-      backgroundColor: ctx => {
-        const v = ctx.raw;
-        return v>190 ? '#d32f2f' : v>160 ? '#f57c00' : '#00897b';
-      },
-      borderRadius:3
-    }]
-  },
-  options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
-    scales:{x:{display:false},y:{display:false,min:100}},animation:{duration:1400}}
-});
+  const totalProjects = new Set(rows.map(r => r[C.COL_LEAD])).size;
+  const instCompleted = new Set(completed.map(r => r[C.COL_LEAD])).size;
 
-// ─── Filter pills ──────────────────────────────────────────────────────────
-document.querySelectorAll('.fpill').forEach(p=>{
-  p.addEventListener('click',function(){
-    document.querySelectorAll('.fpill').forEach(x=>x.classList.remove('on'));
-    this.classList.add('on');
+  const revenue    = completed.reduce((s, r) => s + num(r[C.COL_REVENUE]),  0);
+  const instGMSum  = completed.reduce((s, r) => s + num(r[C.COL_INST_GM]),  0);
+  const bookGMSum  = completed.reduce((s, r) => s + num(r[C.COL_BOOK_GM]),  0);
+  const designGMSum= C.COL_DESIGN_GM
+    ? completed.reduce((s, r) => s + num(r[C.COL_DESIGN_GM]), 0) : 0;
+
+  const instGMPct   = revenue ? (instGMSum  / revenue * 100) : 0;
+  const bookGMPct   = revenue ? (bookGMSum  / revenue * 100) : 0;
+  const designGMPct = revenue ? (designGMSum/ revenue * 100) : 0;
+  const delta       = bookGMPct - instGMPct;
+
+  // ── By Month (using Installed Month column) ──
+  const monthMap = {};
+  completed.forEach(r => {
+    const m = normaliseMonth(r[C.COL_MONTH] || r[C.COL_BOOKING_MONTH]);
+    if (!monthMap[m]) monthMap[m] = { leads: new Set(), rev:0, instGM:0, bookGM:0, tatSum:0, tatCount:0 };
+    monthMap[m].leads.add(r[C.COL_LEAD]);
+    monthMap[m].rev    += num(r[C.COL_REVENUE]);
+    monthMap[m].instGM += num(r[C.COL_INST_GM]);
+    monthMap[m].bookGM += num(r[C.COL_BOOK_GM]);
+    if (C.COL_TAT && r[C.COL_TAT]) { monthMap[m].tatSum += num(r[C.COL_TAT]); monthMap[m].tatCount++; }
   });
-});
+  const months = Object.keys(monthMap).sort((a,b) => monthSortKey(b) - monthSortKey(a)); // newest first
+
+  // ── By City ──
+  const cityMap = {};
+  completed.forEach(r => {
+    const c = r[C.COL_CITY] || "Unknown";
+    if (!cityMap[c]) cityMap[c] = { leads: new Set(), rev:0, instGM:0, bookGM:0, tatSum:0, tatCount:0 };
+    cityMap[c].leads.add(r[C.COL_LEAD]);
+    cityMap[c].rev    += num(r[C.COL_REVENUE]);
+    cityMap[c].instGM += num(r[C.COL_INST_GM]);
+    cityMap[c].bookGM += num(r[C.COL_BOOK_GM]);
+    if (C.COL_TAT && r[C.COL_TAT]) { cityMap[c].tatSum += num(r[C.COL_TAT]); cityMap[c].tatCount++; }
+  });
+  const cities = Object.keys(cityMap).sort((a,b) => cityMap[b].leads.size - cityMap[a].leads.size);
+
+  // ── Size segments — use Size Bracket column (pre-computed in sheet) ──
+  let sizeA = 0, sizeB = 0, sizeC = 0;
+  completed.forEach(r => {
+    const b = (r[C.COL_SIZE_BRACKET] || "").toUpperCase();
+    if      (b.includes("(A)") || b.startsWith("A")) sizeA++;
+    else if (b.includes("(B)") || b.startsWith("B")) sizeB++;
+    else if (b.includes("(C)") || b.startsWith("C")) sizeC++;
+    else {
+      const kw = num(r[C.COL_SIZE]);
+      if (kw > 0 && kw <= 30)       sizeA++;
+      else if (kw > 30 && kw <= 100) sizeB++;
+      else if (kw > 100)             sizeC++;
+    }
+  });
+  const sizeTotal = sizeA + sizeB + sizeC || 1;
+
+  // ── Segments — use BD column ──
+  const segMap = {};
+  completed.forEach(r => {
+    const s = r[C.COL_SEGMENT] || "Other";
+    segMap[s] = (segMap[s] || 0) + 1;
+  });
+  const segTotal = Object.values(segMap).reduce((a,b) => a+b, 0) || 1;
+  const segments = Object.entries(segMap).sort((a,b) => b[1]-a[1]);
+
+  // ── Date range ──
+  const dates = completed.map(r => new Date(r[C.COL_MONTH])).filter(d => !isNaN(d));
+  const minDate = dates.length ? new Date(Math.min(...dates)) : null;
+  const maxDate = dates.length ? new Date(Math.max(...dates)) : null;
+
+  return {
+    totalProjects, instCompleted, revenue,
+    instGMPct, bookGMPct, designGMPct, delta,
+    months, monthMap, cities, cityMap,
+    sizeA, sizeB, sizeC, sizeTotal,
+    segments, segTotal,
+    minDate, maxDate
+  };
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════
+function renderKPIs(m) {
+  document.getElementById('kpiTotal').textContent     = m.totalProjects;
+  document.getElementById('kpiCompleted').textContent = m.instCompleted;
+  document.getElementById('kpiCompletedHint').textContent =
+    (m.totalProjects ? (m.instCompleted/m.totalProjects*100).toFixed(1) : 0) + "% completion rate";
+  document.getElementById('kpiCompletedBadge').textContent =
+    "▲ " + (m.totalProjects ? (m.instCompleted/m.totalProjects*100).toFixed(0) : 0) + "%";
+  document.getElementById('kpiRevenue').textContent   = fmtCr(m.revenue);
+  document.getElementById('kpiInstGM').textContent    = m.instGMPct.toFixed(2) + "%";
+  document.getElementById('kpiBookGM').textContent    = m.bookGMPct.toFixed(2) + "%";
+  document.getElementById('kpiDesignGM').textContent  = m.designGMPct.toFixed(2) + "%";
+  const delta = m.bookGMPct - m.instGMPct;
+  const dBadge = document.getElementById('kpiDeltaBadge');
+  dBadge.textContent = (delta >= 0 ? "▲ " : "▼ ") + Math.abs(delta).toFixed(2) + "%";
+  dBadge.className   = "kpi-badge " + (delta >= 0 ? "bu" : "bd");
+}
+
+function renderBarChart(m) {
+  const labels   = m.months;
+  const instArr  = labels.map(mo => {
+    const d = m.monthMap[mo];
+    return d.rev ? +(d.instGM / d.rev * 100).toFixed(2) : 0;
+  });
+  const bookArr  = labels.map(mo => {
+    const d = m.monthMap[mo];
+    return d.rev ? +(d.bookGM / d.rev * 100).toFixed(2) : 0;
+  });
+
+  const labelPlugin = {
+    id:'topLabels',
+    afterDatasetsDraw(chart){
+      const {ctx} = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        if(meta.hidden) return;
+        meta.data.forEach((bar, i) => {
+          ctx.save();
+          ctx.font         = "800 9.5px 'Nunito', sans-serif";
+          ctx.fillStyle    = di === 0 ? '#1a237e' : '#0277bd';
+          ctx.textAlign    = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(ds.data[i] + '%', bar.x, bar.y - 5);
+          ctx.restore();
+        });
+      });
+    }
+  };
+
+  if (barChartInst) barChartInst.destroy();
+  barChartInst = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    plugins: [labelPlugin],
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Installation GM %', data: instArr,
+          backgroundColor: '#1a237e', hoverBackgroundColor: '#283593',
+          borderRadius:{topLeft:5,topRight:5}, borderSkipped:false,
+          barPercentage:0.38, categoryPercentage:0.82, order:1
+        },
+        {
+          label: 'Booking GM %', data: bookArr,
+          backgroundColor: '#81d4fa', hoverBackgroundColor: '#29b6f6',
+          borderRadius:{topLeft:5,topRight:5}, borderSkipped:false,
+          barPercentage:0.38, categoryPercentage:0.82, order:2
+        }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:26,right:10,left:4,bottom:4}},
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#fff',borderColor:'#d8e2f8',borderWidth:1,
+          titleColor:'#1a237e',bodyColor:'#3949ab',padding:12,cornerRadius:8,
+          callbacks:{label:ctx=>`  ${ctx.dataset.label}: ${ctx.raw}%`}
+        }
+      },
+      scales:{
+        x:{grid:{display:false},border:{display:false},
+          ticks:{color:'#6675b0',font:{weight:'700',size:10},maxRotation:30}},
+        y:{grid:{color:'#edf0fb',lineWidth:1},border:{display:false,dash:[4,4]},
+          ticks:{color:'#6675b0',callback:v=>v+'%',font:{weight:'700',size:10},stepSize:5},
+          min:10,max:45}
+      }
+    }
+  });
+}
+
+function renderDonut(m) {
+  const pA = (m.sizeA/m.sizeTotal*100).toFixed(2);
+  const pB = (m.sizeB/m.sizeTotal*100).toFixed(2);
+  const pC = (m.sizeC/m.sizeTotal*100).toFixed(2);
+  document.getElementById('sizeA').textContent = pA + "%";
+  document.getElementById('sizeB').textContent = pB + "%";
+  document.getElementById('sizeC').textContent = pC + "%";
+  if (sizeDonutInst) sizeDonutInst.destroy();
+  sizeDonutInst = new Chart(document.getElementById('sizeDonut'), {
+    type:'doughnut',
+    data:{
+      labels:['(A) 0-30','(B) 30-100','(C) >100'],
+      datasets:[{
+        data:[pA, pB, pC],
+        backgroundColor:['#1a237e','#29b6f6','#f57c00'],
+        borderWidth:3, borderColor:'#fff', hoverOffset:6
+      }]
+    },
+    options:{
+      cutout:'66%', responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#fff',borderColor:'#d8e2f8',borderWidth:1,
+          callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}}
+      }
+    }
+  });
+}
+
+const SEG_COLORS = ['linear-gradient(90deg,#1a237e,#3949ab)','linear-gradient(90deg,#039be5,#81d4fa)',
+  'linear-gradient(90deg,#00897b,#4db6ac)','linear-gradient(90deg,#7c4dff,#b39ddb)',
+  'linear-gradient(90deg,#f57c00,#ffd54f)','linear-gradient(90deg,#d32f2f,#ef9a9a)'];
+const SEG_TEXT_COLORS = ['#1a237e','#039be5','#00897b','#7c4dff','#f57c00','#d32f2f'];
+
+function renderSegments(m) {
+  const el = document.getElementById('segmentBars');
+  el.innerHTML = m.segments.slice(0,6).map(([name, count], i) => {
+    const pct = (count/m.segTotal*100).toFixed(1);
+    return `<div>
+      <div class="seg-hd"><span class="seg-nm">${name}</span><span style="color:${SEG_TEXT_COLORS[i]}">${pct}%</span></div>
+      <div class="seg-bg"><div class="seg-fill" style="width:${pct}%;background:${SEG_COLORS[i]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderMonthlyTable(m) {
+  const tbody = document.getElementById('monthlyTbody');
+  let html = m.months.map(mo => {
+    const d = m.monthMap[mo];
+    const instP = d.rev ? (d.instGM/d.rev*100).toFixed(2) : "0.00";
+    const bookP = d.rev ? (d.bookGM/d.rev*100).toFixed(2) : "0.00";
+    const delta = (parseFloat(bookP) - parseFloat(instP)).toFixed(2);
+    const dCls  = parseFloat(delta) >= 0 ? "dp" : "dn";
+    const dTxt  = parseFloat(delta) >= 0 ? "+" + delta : delta;
+    const leads = d.leads.size;
+    return `<tr>
+      <td class="clbl">${mo}</td>
+      <td>${leads}</td>
+      <td>${instP}%</td>
+      <td>${bookP}%</td>
+      <td class="${dCls}">${dTxt}%</td>
+    </tr>`;
+  }).join('');
+  // totals row
+  const totRev  = m.months.reduce((s,mo) => s + m.monthMap[mo].rev, 0);
+  const totInst = m.months.reduce((s,mo) => s + m.monthMap[mo].instGM, 0);
+  const totBook = m.months.reduce((s,mo) => s + m.monthMap[mo].bookGM, 0);
+  const totLeads= new Set(m.months.flatMap(mo => [...m.monthMap[mo].leads])).size;
+  const tInstP  = totRev ? (totInst/totRev*100).toFixed(2) : "0.00";
+  const tBookP  = totRev ? (totBook/totRev*100).toFixed(2) : "0.00";
+  const tDelta  = (parseFloat(tBookP)-parseFloat(tInstP)).toFixed(2);
+  html += `<tr class="tr-tot">
+    <td>TOTAL</td><td>${totLeads}</td>
+    <td>${tInstP}%</td><td>${tBookP}%</td>
+    <td>${tDelta}%</td>
+  </tr>`;
+  tbody.innerHTML = html;
+}
+
+function renderCityTable(m) {
+  const tbody = document.getElementById('cityTbody');
+  let html = m.cities.map(city => {
+    const d = m.cityMap[city];
+    const instP = d.rev ? (d.instGM/d.rev*100).toFixed(2) : "0.00";
+    const bookP = d.rev ? (d.bookGM/d.rev*100).toFixed(2) : "0.00";
+    const delta = (parseFloat(bookP) - parseFloat(instP)).toFixed(2);
+    const dCls  = parseFloat(delta) >= 0 ? "dp" : "dn";
+    const dTxt  = parseFloat(delta) >= 0 ? "+" + delta : delta;
+    const leads = d.leads.size;
+    const tat   = d.tatCount ? Math.round(d.tatSum/d.tatCount) : "—";
+    const tatColor = typeof tat === 'number' ? (tat > 190 ? '#d32f2f' : tat > 160 ? '#f57c00' : '#039be5') : '#aab4d8';
+    const tatWidth = typeof tat === 'number' ? Math.min(tat/3, 50) : 0;
+    return `<tr>
+      <td class="clbl">${city}</td>
+      <td>${leads}</td>
+      <td>${instP}%</td>
+      <td>${bookP}%</td>
+      <td class="${dCls}">${dTxt}%</td>
+    </tr>`;
+  }).join('');
+  const totRev  = m.cities.reduce((s,c) => s + m.cityMap[c].rev, 0);
+  const totInst = m.cities.reduce((s,c) => s + m.cityMap[c].instGM, 0);
+  const totBook = m.cities.reduce((s,c) => s + m.cityMap[c].bookGM, 0);
+  const totLeads= new Set(m.cities.flatMap(c => [...m.cityMap[c].leads])).size;
+  const tInstP  = totRev ? (totInst/totRev*100).toFixed(2) : "0.00";
+  const tBookP  = totRev ? (totBook/totRev*100).toFixed(2) : "0.00";
+  const tDelta  = (parseFloat(tBookP)-parseFloat(tInstP)).toFixed(2);
+  html += `<tr class="tr-tot">
+    <td>TOTAL</td><td>${totLeads}</td>
+    <td>${tInstP}%</td><td>${tBookP}%</td>
+    <td>${tDelta}%</td>
+  </tr>`;
+  tbody.innerHTML = html;
+}
+
+function renderAnalytics(m) {
+  // Best month
+  let bestMo = null, bestPct = -Infinity;
+  m.months.forEach(mo => {
+    const d = m.monthMap[mo];
+    const p = d.rev ? d.instGM/d.rev*100 : 0;
+    if (p > bestPct) { bestPct = p; bestMo = mo; }
+  });
+  document.getElementById('bestMonth').textContent  = bestMo || "—";
+  document.getElementById('bestMonthGM').textContent = bestMo ? "▲ " + bestPct.toFixed(2) + "% Installation GM" : "—";
+
+  // Top city
+  let topC = null, topCPct = -Infinity;
+  m.cities.forEach(c => {
+    const d = m.cityMap[c];
+    const p = d.rev ? d.instGM/d.rev*100 : 0;
+    if (p > topCPct) { topCPct = p; topC = c; }
+  });
+  document.getElementById('topCity').textContent  = topC || "—";
+  document.getElementById('topCityGM').textContent = topC
+    ? "▲ " + topCPct.toFixed(2) + "% GM · " + m.cityMap[topC].leads.size + " Projects" : "—";
+
+  // Avg TAT
+  const allTATs = m.cities.map(c => {
+    const d = m.cityMap[c];
+    return d.tatCount ? d.tatSum/d.tatCount : null;
+  }).filter(v => v !== null);
+  const avgTat = allTATs.length ? Math.round(allTATs.reduce((a,b)=>a+b,0)/allTATs.length) : "—";
+  document.getElementById('avgTAT').textContent = avgTat;
+
+  // Worst TAT city
+  let worstCity = null, worstVal = -Infinity;
+  m.cities.forEach(c => {
+    const d = m.cityMap[c];
+    const t = d.tatCount ? d.tatSum/d.tatCount : 0;
+    if (t > worstVal) { worstVal = t; worstCity = c; }
+  });
+  document.getElementById('worstTAT').textContent = worstCity
+    ? "▼ " + worstCity + " highest at " + Math.round(worstVal) + " days" : "—";
+
+  // Sparklines
+  const sparkMonths = [...m.months].reverse(); // oldest first for trend
+  const sparkInstData = sparkMonths.map(mo => {
+    const d = m.monthMap[mo];
+    return d.rev ? +(d.instGM/d.rev*100).toFixed(2) : 0;
+  });
+  const bestIdx = sparkInstData.indexOf(Math.max(...sparkInstData));
+  const pointRadii = sparkInstData.map((_,i) => i === bestIdx ? 5 : 2);
+
+  if (sparkMonthInst) sparkMonthInst.destroy();
+  sparkMonthInst = new Chart(document.getElementById('sparkMonth'), {
+    type:'line',
+    data:{
+      labels: sparkMonths,
+      datasets:[{
+        data: sparkInstData,
+        borderColor:'#00897b', borderWidth:2.5,
+        pointRadius: pointRadii,
+        pointBackgroundColor:'#00897b',
+        fill:true, backgroundColor:'rgba(0,137,123,.09)', tension:.4
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false}},animation:{duration:1400}}
+  });
+
+  const cityLabels = m.cities.slice(0,9);
+  const cityGMs    = cityLabels.map(c => {
+    const d = m.cityMap[c];
+    return d.rev ? +(d.instGM/d.rev*100).toFixed(2) : 0;
+  });
+  const cityColors = cityGMs.map(v => v >= 35 ? '#00897b' : v >= 25 ? '#039be5' : '#d32f2f');
+  if (sparkCityInst) sparkCityInst.destroy();
+  sparkCityInst = new Chart(document.getElementById('sparkCity'), {
+    type:'bar',
+    data:{
+      labels: cityLabels,
+      datasets:[{data: cityGMs, backgroundColor: cityColors, borderRadius:3}]
+    },
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false,min:10}},animation:{duration:1400}}
+  });
+
+  const tatVals = cityLabels.map(c => {
+    const d = m.cityMap[c];
+    return d.tatCount ? Math.round(d.tatSum/d.tatCount) : 0;
+  });
+  const tatColors = tatVals.map(v => v > 190 ? '#d32f2f' : v > 160 ? '#f57c00' : '#00897b');
+  if (sparkTATInst) sparkTATInst.destroy();
+  sparkTATInst = new Chart(document.getElementById('sparkTAT'), {
+    type:'bar',
+    data:{
+      labels: cityLabels,
+      datasets:[{data: tatVals, backgroundColor: tatColors, borderRadius:3}]
+    },
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false,min:50}},animation:{duration:1400}}
+  });
+}
+
+function renderHeader(m) {
+  const now = new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('lastUpdated').textContent = "Updated " + now;
+}
+
+// ════════════════════════════════════════════════════════════
+//  POPULATE FILTER DROPDOWNS
+// ════════════════════════════════════════════════════════════
+function populateFilters(rows) {
+  const C = CONFIG;
+
+  // Collect all unique installed months (sorted chronologically)
+  const monthSet = new Set();
+  rows.forEach(r => {
+    const raw = r[C.COL_MONTH] || r[C.COL_BOOKING_MONTH];
+    if (raw) monthSet.add(normaliseMonth(raw));
+  });
+  const sortedMonths = [...monthSet].filter(m => m !== 'Unknown')
+    .sort((a, b) => monthSortKey(a) - monthSortKey(b)); // oldest → newest
+
+  const fromSel = document.getElementById('filterFrom');
+  const toSel   = document.getElementById('filterTo');
+  // Save current values
+  const prevFrom = fromSel.value;
+  const prevTo   = toSel.value;
+  fromSel.innerHTML = '<option value="">Earliest</option>';
+  toSel.innerHTML   = '<option value="">Latest</option>';
+  sortedMonths.forEach(m => {
+    fromSel.innerHTML += `<option value="${m}">${m}</option>`;
+    toSel.innerHTML   += `<option value="${m}">${m}</option>`;
+  });
+  // Restore values if still valid
+  if (prevFrom && sortedMonths.includes(prevFrom)) fromSel.value = prevFrom;
+  if (prevTo   && sortedMonths.includes(prevTo))   toSel.value   = prevTo;
+
+  // City dropdown
+  const citySet = new Set(['All']);
+  rows.forEach(r => { if (r[C.COL_CITY]) citySet.add(r[C.COL_CITY]); });
+  const cities = [...citySet];
+  const citySel = document.getElementById('filterCity');
+  const prevCity = citySel.value;
+  citySel.innerHTML = '';
+  cities.forEach(c => {
+    citySel.innerHTML += `<option value="${c}">${c === 'All' ? 'All Cities' : c}</option>`;
+  });
+  if (prevCity && cities.includes(prevCity)) citySel.value = prevCity;
+}
+
+// ════════════════════════════════════════════════════════════
+//  APPLY FILTERS
+// ════════════════════════════════════════════════════════════
+function applyFilters() {
+  const C        = CONFIG;
+  const fromVal  = document.getElementById('filterFrom').value;  // e.g. "Apr 2025" or ""
+  const toVal    = document.getElementById('filterTo').value;
+  const cityVal  = document.getElementById('filterCity').value;
+
+  const fromTs = fromVal ? monthSortKey(fromVal) : -Infinity;
+  const toTs   = toVal   ? monthSortKey(toVal)   :  Infinity;
+
+  let filtered = allRows.filter(r => {
+    // City filter
+    if (cityVal && cityVal !== 'All' && r[C.COL_CITY] !== cityVal) return false;
+    // Month filter — based on Installed Month column
+    const raw = r[C.COL_MONTH] || r[C.COL_BOOKING_MONTH];
+    if (fromVal || toVal) {
+      const m   = normaliseMonth(raw);
+      const ts  = monthSortKey(m);
+      if (ts < fromTs || ts > toTs) return false;
+    }
+    return true;
+  });
+
+  // Show active filter badge in subtitle
+  const parts = [];
+  if (fromVal || toVal) parts.push((fromVal || 'Start') + ' → ' + (toVal || 'Latest'));
+  if (cityVal && cityVal !== 'All') parts.push(cityVal);
+  const sub = document.getElementById('lastUpdated');
+  const now = new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  sub.textContent = parts.length ? `Filtered: ${parts.join(' · ')}` : `Updated ${now}`;
+
+  const m = compute(filtered);
+  renderKPIs(m);
+  renderBarChart(m);
+  renderDonut(m);
+  renderSegments(m);
+  renderMonthlyTable(m);
+  renderCityTable(m);
+  renderAnalytics(m);
+}
+
+function resetFilters() {
+  document.getElementById('filterFrom').value = '';
+  document.getElementById('filterTo').value   = '';
+  document.getElementById('filterCity').value = 'All';
+  applyFilters();
+}
+
+// ════════════════════════════════════════════════════════════
+//  MAIN INIT
+// ════════════════════════════════════════════════════════════
+async function initDashboard() {
+  const overlay   = document.getElementById('loadingOverlay');
+  const errBanner = document.getElementById('errorBanner');
+  overlay.classList.remove('hidden');
+  errBanner.style.display = 'none';
+
+  try {
+    allRows = await fetchSheetData();
+    if (!allRows.length) throw new Error("No rows returned from sheet");
+
+    populateFilters(allRows);
+
+    const m = compute(allRows);
+    renderHeader(m);
+    renderKPIs(m);
+    renderBarChart(m);
+    renderDonut(m);
+    renderSegments(m);
+    renderMonthlyTable(m);
+    renderCityTable(m);
+    renderAnalytics(m);
+
+    overlay.classList.add('hidden');
+  } catch (err) {
+    console.error("Dashboard load error:", err);
+    overlay.classList.add('hidden');
+    errBanner.style.display = 'block';
+    errBanner.innerHTML = `⚠️ <strong>Could not load live data:</strong> ${err.message}.<br>
+      Make sure your sheet is published: <em>File → Share → Publish to web → CSV</em>, then click ↻ Refresh.`;
+  }
+}
+
+initDashboard();
 </script>
 </body>
 </html>
