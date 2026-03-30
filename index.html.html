@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSE-B2B Installation GM – Solar Square</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#1a237e;--navy2:#283593;--navy3:#3949ab;
+  --sky:#039be5;--sky2:#29b6f6;--sky3:#81d4fa;--skypale:#e3f2fd;
+  --bg:#eef2fb;--surface:#fff;
+  --border:#d8e2f8;--border2:#c5d3f0;
+  --green:#00897b;--red:#d32f2f;--amber:#f57c00;
+  --muted:#6675b0;--dim:#aab4d8;
+  --sh1:0 2px 8px rgba(26,35,126,.07);
+  --sh2:0 6px 24px rgba(26,35,126,.11);
+  --sh3:0 12px 40px rgba(26,35,126,.15);
+}
+body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padding:18px 22px 30px;min-height:100vh;}
+
+/* ─── HEADER ─── */
+.header{
+  background:linear-gradient(135deg,#0d1757 0%,var(--navy) 50%,#1565c0 100%);
+  border-radius:18px;padding:0;display:flex;align-items:stretch;
+  margin-bottom:18px;box-shadow:var(--sh3);overflow:hidden;
+}
+.header-logo-block{
+  background:rgba(255,255,255,.07);
+  border-right:1px solid rgba(255,255,255,.1);
+  padding:16px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.logo-svg-wrap{background:#fff;border-radius:10px;padding:5px 8px;display:flex;align-items:center;}
+.header-text{padding:14px 20px;flex:1;}
+.header-title{color:#fff;font-size:18px;font-weight:900;letter-spacing:.3px;line-height:1.25;}
+.header-title em{color:var(--sky2);font-style:normal;}
+.header-sub{color:var(--sky3);font-size:10.5px;font-weight:700;letter-spacing:.8px;margin-top:3px;text-transform:uppercase;}
+.header-right{padding:14px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.fpill{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.18);border-radius:20px;
+  padding:5px 13px;font-size:11px;font-weight:800;color:rgba(255,255,255,.7);
+  cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;}
+.fpill:hover{background:rgba(41,182,246,.25);border-color:var(--sky2);color:#fff;}
+.fpill.on{background:var(--sky2);border-color:var(--sky2);color:var(--navy);}
+.dbadge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  border-radius:8px;padding:5px 12px;font-size:10px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;color:var(--sky3);}
+
+/* ─── KPI ROW ─── */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;}
+.kpi{
+  background:var(--surface);border-radius:14px;padding:16px 15px 13px;
+  border:1.5px solid var(--border);box-shadow:var(--sh1);
+  position:relative;overflow:hidden;cursor:default;
+  transition:transform .18s,box-shadow .18s;
+  animation:up .4s ease both;
+}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--sh2);}
+.kpi-bar{position:absolute;top:0;left:0;right:0;height:3.5px;border-radius:14px 14px 0 0;}
+.kpi-lbl{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px;}
+.kpi-val{font-size:26px;font-weight:900;line-height:1;}
+.kpi-hint{font-size:9.5px;color:var(--dim);margin-top:5px;font-weight:700;}
+.kpi-badge{position:absolute;top:11px;right:10px;font-size:8.5px;font-weight:800;
+  padding:2px 6px;border-radius:10px;font-family:'JetBrains Mono',monospace;}
+.bu{background:#e0f7f4;color:var(--green);}
+.bd{background:#ffebee;color:var(--red);}
+
+/* ─── SECTION GRID ─── */
+.sec-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:14px;}
+
+/* ─── CARD ─── */
+.card{background:var(--surface);border-radius:14px;padding:18px 20px;
+  border:1.5px solid var(--border);box-shadow:var(--sh1);animation:up .45s ease both;}
+.ctitle{font-size:10.5px;font-weight:900;color:var(--navy);text-transform:uppercase;
+  letter-spacing:1.1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ctitle::before{content:'';width:3.5px;height:15px;
+  background:linear-gradient(180deg,var(--sky2),var(--navy));border-radius:3px;flex-shrink:0;}
+.rp{display:flex;flex-direction:column;gap:14px;}
+
+/* ─── BAR CHART WRAPPER ─── */
+.chart-outer{position:relative;width:100%;height:280px;}
+
+/* ─── CUSTOM LEGEND ─── */
+.clegend{display:flex;align-items:center;gap:18px;margin-bottom:12px;}
+.cl-item{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:var(--muted);}
+.cl-dot{width:14px;height:8px;border-radius:3px;}
+
+/* ─── DONUT ─── */
+.donut-wrap{display:flex;align-items:center;gap:14px;}
+.donut-canvas{position:relative;width:120px;height:120px;flex-shrink:0;}
+.donut-canvas canvas{position:absolute;inset:0;}
+.donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;}
+.donut-mid-val{font-size:20px;font-weight:900;color:var(--navy);line-height:1;}
+.donut-mid-lbl{font-size:8.5px;font-weight:800;color:var(--muted);letter-spacing:.5px;}
+.donut-leg{flex:1;}
+.dl-row{display:flex;align-items:center;justify-content:space-between;
+  padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.dl-row:last-child{border-bottom:none;}
+.dl-left{display:flex;align-items:center;gap:7px;color:var(--muted);font-weight:700;}
+.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dl-pct{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;}
+
+/* ─── SEGMENTS ─── */
+.segs{display:flex;flex-direction:column;gap:11px;}
+.seg-hd{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;font-weight:800;}
+.seg-nm{color:var(--muted);}
+.seg-bg{height:7px;background:var(--bg);border-radius:4px;overflow:hidden;}
+.seg-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+
+/* ─── TABLES ─── */
+.tbl-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.dtbl{width:100%;border-collapse:collapse;}
+.dtbl th{background:var(--navy);color:#fff;font-weight:800;font-size:9px;
+  text-transform:uppercase;letter-spacing:.7px;padding:9px 10px;
+  text-align:left;white-space:nowrap;}
+.dtbl th:first-child{border-radius:8px 0 0 0;}
+.dtbl th:last-child{border-radius:0 8px 0 0;}
+.dtbl td{padding:7.5px 10px;border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--navy);white-space:nowrap;}
+.dtbl tr:hover td{background:var(--skypale);}
+.dtbl tr:last-child td{border-bottom:none;}
+.dtbl .tr-tot td{background:var(--skypale);font-weight:900;color:var(--navy);
+  border-top:2px solid var(--sky2);font-family:'Nunito',sans-serif;font-size:11px;}
+.clbl{font-family:'Nunito',sans-serif!important;font-weight:700;}
+.dp{color:var(--green)!important;font-weight:800;}
+.dn{color:var(--red)!important;font-weight:800;}
+.tbar{display:inline-block;height:4px;border-radius:2px;vertical-align:middle;margin-right:4px;opacity:.75;}
+
+/* ─── ANALYTICS ─── */
+.ana-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.mini{background:var(--surface);border-radius:14px;padding:15px 17px;
+  border:1.5px solid var(--border);box-shadow:var(--sh1);animation:up .5s ease both;}
+.mini-t{font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;}
+.mini-v{font-size:24px;font-weight:900;line-height:1;}
+.mini-c{font-size:10.5px;margin-top:4px;font-family:'JetBrains Mono',monospace;font-weight:700;}
+.mini-c.up{color:var(--green);}
+.mini-c.dn{color:var(--red);}
+.mini-d{font-size:9.5px;color:var(--dim);margin-top:3px;font-weight:700;}
+
+/* ─── FOOTER ─── */
+.footer{background:var(--navy);border-radius:10px;text-align:center;padding:11px;
+  color:var(--sky3);font-size:9.5px;font-weight:700;letter-spacing:.6px;
+  font-family:'JetBrains Mono',monospace;}
+
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.kpi:nth-child(1){animation-delay:.04s}.kpi:nth-child(2){animation-delay:.08s}
+.kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.16s}
+.kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.24s}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="header-logo-block">
+    <div class="logo-svg-wrap">
+      <svg width="48" height="44" viewBox="0 0 80 72" xmlns="http://www.w3.org/2000/svg">
+        <rect x="42" y="2"  width="9" height="9" rx="1.8" fill="#29b6f6"/>
+        <rect x="53" y="2"  width="9" height="9" rx="1.8" fill="#29b6f6"/>
+        <rect x="64" y="2"  width="9" height="9" rx="1.8" fill="#81d4fa"/>
+        <rect x="42" y="13" width="9" height="9" rx="1.8" fill="#29b6f6"/>
+        <rect x="53" y="13" width="9" height="9" rx="1.8" fill="#039be5"/>
+        <rect x="64" y="13" width="9" height="9" rx="1.8" fill="#29b6f6"/>
+        <rect x="75" y="13" width="5" height="9" rx="1.8" fill="#81d4fa"/>
+        <rect x="42" y="24" width="9" height="9" rx="1.8" fill="#81d4fa"/>
+        <rect x="53" y="24" width="9" height="9" rx="1.8" fill="#039be5"/>
+        <rect x="64" y="24" width="9" height="9" rx="1.8" fill="#29b6f6"/>
+        <rect x="75" y="24" width="5" height="9" rx="1.8" fill="#29b6f6"/>
+        <rect x="53" y="35" width="9" height="9" rx="1.8" fill="#81d4fa"/>
+        <rect x="64" y="35" width="9" height="9" rx="1.8" fill="#039be5"/>
+        <text x="2" y="55" font-family="Arial Black,sans-serif" font-weight="900" font-size="15" fill="#1a237e">solar</text>
+        <text x="2" y="72" font-family="Arial Black,sans-serif" font-weight="900" font-size="15" fill="#1a237e">square</text>
+      </svg>
+    </div>
+  </div>
+  <div class="header-text">
+    <div class="header-title">SSE-B2B <em>Installation GM</em> Analysis Report</div>
+    <div class="header-sub">B2B Solar Installation · Performance Dashboard</div>
+  </div>
+  <div class="header-right">
+    <div class="dbadge">📅 25-04-2025 → 25-11-2025</div>
+    <div class="fpill on">All Cities</div>
+    <div class="fpill">Pune</div>
+    <div class="fpill">Mumbai</div>
+    <div class="fpill">Bengaluru</div>
+  </div>
+</div>
+
+<!-- ═══ KPI ROW ═══ -->
+<div class="kpi-row">
+  <div class="kpi" style="animation-delay:.04s">
+    <div class="kpi-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div>
+    <div class="kpi-lbl">Total Projects</div>
+    <div class="kpi-val" style="color:#1a237e">413</div>
+    <div class="kpi-hint">All-time pipeline</div>
+  </div>
+  <div class="kpi" style="animation-delay:.08s">
+    <div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#81d4fa)"></div>
+    <div class="kpi-lbl">Installation Completed</div>
+    <div class="kpi-val" style="color:#039be5">124</div>
+    <div class="kpi-hint">30.0% completion rate</div>
+    <span class="kpi-badge bu">▲ 30%</span>
+  </div>
+  <div class="kpi" style="animation-delay:.12s">
+    <div class="kpi-bar" style="background:linear-gradient(90deg,#f57c00,#ffd54f)"></div>
+    <div class="kpi-lbl">Revenue</div>
+    <div class="kpi-val" style="color:#f57c00">3.85K</div>
+    <div class="kpi-hint">Crore (₹)</div>
+  </div>
+  <div class="kpi" style="animation-delay:.16s">
+    <div class="kpi-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div>
+    <div class="kpi-lbl">Installation GM</div>
+    <div class="kpi-val" style="color:#00897b">25.57%</div>
+    <div class="kpi-hint">Gross margin</div>
+    <span class="kpi-badge bu">▲ 3.16%</span>
+  </div>
+  <div class="kpi" style="animation-delay:.20s">
+    <div class="kpi-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div>
+    <div class="kpi-lbl">Booking GM</div>
+    <div class="kpi-val" style="color:#7c4dff">28.73%</div>
+    <div class="kpi-hint">vs Installation delta</div>
+    <span class="kpi-badge bd">▼ 3.16%</span>
+  </div>
+  <div class="kpi" style="animation-delay:.24s">
+    <div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#1a237e)"></div>
+    <div class="kpi-lbl">Design GM</div>
+    <div class="kpi-val" style="color:#3949ab">26.15%</div>
+    <div class="kpi-hint">Design margin</div>
+  </div>
+</div>
+
+<!-- ═══ CHART + RIGHT PANEL ═══ -->
+<div class="sec-grid">
+
+  <!-- BAR CHART CARD -->
+  <div class="card">
+    <div class="ctitle">Booking VS Installation GM %</div>
+    <div class="clegend">
+      <div class="cl-item"><div class="cl-dot" style="background:#1a237e"></div>Installation GM %</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#81d4fa"></div>Booking GM %</div>
+    </div>
+    <div class="chart-outer">
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="rp">
+    <!-- SIZE WISE DONUT -->
+    <div class="card">
+      <div class="ctitle">Size Wise GM</div>
+      <div class="donut-wrap">
+        <div class="donut-canvas">
+          <canvas id="sizeDonut" width="120" height="120"></canvas>
+          <div class="donut-mid">
+            <div class="donut-mid-val">3</div>
+            <div class="donut-mid-lbl">SEGMENTS</div>
+          </div>
+        </div>
+        <div class="donut-leg">
+          <div class="dl-row">
+            <div class="dl-left"><div class="dl-dot" style="background:#1a237e"></div>(A) 0–30</div>
+            <div class="dl-pct" style="color:#1a237e">40.02%</div>
+          </div>
+          <div class="dl-row">
+            <div class="dl-left"><div class="dl-dot" style="background:#29b6f6"></div>(B) 30–100</div>
+            <div class="dl-pct" style="color:#039be5">37.91%</div>
+          </div>
+          <div class="dl-row">
+            <div class="dl-left"><div class="dl-dot" style="background:#f57c00"></div>(C) &gt;100</div>
+            <div class="dl-pct" style="color:#f57c00">22.07%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEGMENT TYPE -->
+    <div class="card">
+      <div class="ctitle">Segment Type</div>
+      <div class="segs">
+        <div>
+          <div class="seg-hd"><span class="seg-nm">C&amp;I</span><span style="color:#1a237e">48.44%</span></div>
+          <div class="seg-bg"><div class="seg-fill" style="width:48.44%;background:linear-gradient(90deg,#1a237e,#3949ab)"></div></div>
+        </div>
+        <div>
+          <div class="seg-hd"><span class="seg-nm">CHS</span><span style="color:#039be5">23.63%</span></div>
+          <div class="seg-bg"><div class="seg-fill" style="width:23.63%;background:linear-gradient(90deg,#039be5,#81d4fa)"></div></div>
+        </div>
+        <div>
+          <div class="seg-hd"><span class="seg-nm">S C&amp;I</span><span style="color:#00897b">15.2%</span></div>
+          <div class="seg-bg"><div class="seg-fill" style="width:15.2%;background:linear-gradient(90deg,#00897b,#4db6ac)"></div></div>
+        </div>
+        <div>
+          <div class="seg-hd"><span class="seg-nm">Large</span><span style="color:#7c4dff">12.73%</span></div>
+          <div class="seg-bg"><div class="seg-fill" style="width:12.73%;background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TABLES ═══ -->
+<div class="tbl-grid">
+  <!-- MONTHLY -->
+  <div class="card">
+    <div class="ctitle">Monthly Performance Breakdown</div>
+    <table class="dtbl">
+      <thead><tr>
+        <th>Month</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="clbl">Nov 2025</td><td>30</td><td>26.18%</td><td>30.16%</td><td class="dn">-3.98%</td><td><span class="tbar" style="width:37px;background:#039be5"></span>187</td></tr>
+        <tr><td class="clbl">Sep 2025</td><td>23</td><td>27.45%</td><td>29.15%</td><td class="dp">+1.70%</td><td><span class="tbar" style="width:36px;background:#1a237e"></span>181</td></tr>
+        <tr><td class="clbl">Aug 2025</td><td>33</td><td>23.95%</td><td>28.17%</td><td class="dp">+4.22%</td><td><span class="tbar" style="width:38px;background:#039be5"></span>189</td></tr>
+        <tr><td class="clbl">Jul 2025</td><td>13</td><td>21.78%</td><td>26.40%</td><td class="dp">+4.62%</td><td><span class="tbar" style="width:29px;background:#1a237e"></span>147</td></tr>
+        <tr><td class="clbl">Jun 2025</td><td>4</td><td>31.51%</td><td>31.97%</td><td class="dp">+0.47%</td><td><span class="tbar" style="width:27px;background:#1a237e"></span>137</td></tr>
+        <tr><td class="clbl">May 2025</td><td>11</td><td>34.46%</td><td>30.55%</td><td class="dn">-3.91%</td><td><span class="tbar" style="width:26px;background:#1a237e"></span>132</td></tr>
+        <tr><td class="clbl">Apr 2025</td><td>10</td><td>23.13%</td><td>26.59%</td><td class="dp">+3.47%</td><td><span class="tbar" style="width:29px;background:#1a237e"></span>146</td></tr>
+        <tr class="tr-tot"><td>TOTAL</td><td>124</td><td>25.57%</td><td>28.73%</td><td>3.16%</td><td>172</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- CITY -->
+  <div class="card">
+    <div class="ctitle">City-Wise Performance</div>
+    <table class="dtbl">
+      <thead><tr>
+        <th>City</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="clbl">Pune</td><td>58</td><td>27.65%</td><td>28.61%</td><td class="dp">+0.96%</td><td><span class="tbar" style="width:31px;background:#1a237e"></span>157</td></tr>
+        <tr><td class="clbl">Mumbai</td><td>35</td><td>21.33%</td><td>28.46%</td><td class="dp">+7.13%</td><td><span class="tbar" style="width:42px;background:#d32f2f"></span>213</td></tr>
+        <tr><td class="clbl">Navi Mumbai</td><td>9</td><td>37.59%</td><td>35.68%</td><td class="dn">-1.91%</td><td><span class="tbar" style="width:27px;background:#00897b"></span>135</td></tr>
+        <tr><td class="clbl">Bengaluru</td><td>8</td><td>19.92%</td><td>27.22%</td><td class="dp">+7.29%</td><td><span class="tbar" style="width:38px;background:#d32f2f"></span>189</td></tr>
+        <tr><td class="clbl">Thane</td><td>5</td><td>33.03%</td><td>27.85%</td><td class="dn">-5.18%</td><td><span class="tbar" style="width:26px;background:#00897b"></span>131</td></tr>
+        <tr><td class="clbl">MP</td><td>3</td><td>33.44%</td><td>27.45%</td><td class="dn">-5.99%</td><td><span class="tbar" style="width:30px;background:#f57c00"></span>151</td></tr>
+        <tr><td class="clbl">Other</td><td>2</td><td>46.08%</td><td>39.79%</td><td class="dn">-6.29%</td><td><span class="tbar" style="width:23px;background:#00897b"></span>116</td></tr>
+        <tr><td class="clbl">Indore</td><td>1</td><td>35.98%</td><td>34.66%</td><td class="dn">-1.32%</td><td><span class="tbar" style="width:35px;background:#f57c00"></span>177</td></tr>
+        <tr><td class="clbl">Khandala</td><td>1</td><td>39.10%</td><td>27.78%</td><td class="dn">-11.32%</td><td><span class="tbar" style="width:36px;background:#d32f2f"></span>183</td></tr>
+        <tr class="tr-tot"><td>TOTAL</td><td>124</td><td>25.57%</td><td>28.73%</td><td>3.16%</td><td>172</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ ANALYTICS STRIP ═══ -->
+<div class="ana-grid">
+  <div class="mini">
+    <div class="mini-t">Best Performing Month</div>
+    <div class="mini-v" style="color:#00897b">May 2025</div>
+    <div class="mini-c up">▲ 34.46% Installation GM</div>
+    <div class="mini-d">Highest margin in the period</div>
+    <canvas id="sparkMonth" height="46" style="margin-top:12px"></canvas>
+  </div>
+  <div class="mini">
+    <div class="mini-t">Top City by Install GM%</div>
+    <div class="mini-v" style="color:#1a237e">Other</div>
+    <div class="mini-c up">▲ 46.08% GM · 2 Projects</div>
+    <div class="mini-d">Highest installation margin city</div>
+    <canvas id="sparkCity" height="46" style="margin-top:12px"></canvas>
+  </div>
+  <div class="mini">
+    <div class="mini-t">Avg TAT Days by City</div>
+    <div class="mini-v" style="color:#039be5">172</div>
+    <div class="mini-c dn">▼ Mumbai highest at 213 days</div>
+    <div class="mini-d">Green &lt;160 · Amber 160–190 · Red &gt;190</div>
+    <canvas id="sparkTAT" height="46" style="margin-top:12px"></canvas>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; SSE-B2B INSTALLATION GM ANALYSIS &nbsp;|&nbsp; APR 2025 – NOV 2025 &nbsp;|&nbsp; CONFIDENTIAL</div>
+
+<script>
+// ─── Global Defaults ───────────────────────────────────────────────────────
+Chart.defaults.font.family = "'Nunito', sans-serif";
+Chart.defaults.font.size   = 10;
+Chart.defaults.color       = '#6675b0';
+Chart.defaults.borderColor = '#dce4f8';
+
+// ─── Custom datalabels plugin ──────────────────────────────────────────────
+const labelPlugin = {
+  id:'topLabels',
+  afterDatasetsDraw(chart){
+    const {ctx} = chart;
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      if(meta.hidden) return;
+      meta.data.forEach((bar, i) => {
+        const val = ds.data[i];
+        const x   = bar.x;
+        const y   = bar.y - 5;
+        ctx.save();
+        ctx.font        = `800 9.5px 'Nunito', sans-serif`;
+        ctx.fillStyle   = di === 0 ? '#1a237e' : '#0277bd';
+        ctx.textAlign   = 'center';
+        ctx.textBaseline= 'bottom';
+        ctx.fillText(val + '%', x, y);
+        ctx.restore();
+      });
+    });
+  }
+};
+
+// ─── MAIN BAR CHART ────────────────────────────────────────────────────────
+const months  = ['Nov 2025','Sep 2025','Aug 2025','Jul 2025','Jun 2025','May 2025','Apr 2025'];
+const instGM  = [26.18, 27.45, 23.95, 21.78, 31.51, 34.46, 23.13];
+const bookGM  = [30.16, 29.15, 28.17, 26.40, 31.97, 30.55, 26.59];
+
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  plugins: [labelPlugin],
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'Installation GM %',
+        data: instGM,
+        backgroundColor: '#1a237e',
+        hoverBackgroundColor: '#283593',
+        borderRadius: { topLeft:5, topRight:5 },
+        borderSkipped: false,
+        barPercentage: 0.38,
+        categoryPercentage: 0.82,
+        order: 1
+      },
+      {
+        label: 'Booking GM %',
+        data: bookGM,
+        backgroundColor: '#81d4fa',
+        hoverBackgroundColor: '#29b6f6',
+        borderRadius: { topLeft:5, topRight:5 },
+        borderSkipped: false,
+        barPercentage: 0.38,
+        categoryPercentage: 0.82,
+        order: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: { top: 26, right: 10, left: 4, bottom: 4 } },
+    interaction: { mode:'index', intersect:false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#fff',
+        borderColor: '#d8e2f8',
+        borderWidth: 1,
+        titleColor: '#1a237e',
+        bodyColor: '#3949ab',
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: ctx => `  ${ctx.dataset.label}: ${ctx.raw}%`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        border: { display: false },
+        ticks: {
+          color: '#6675b0',
+          font: { weight: '700', size: 10 },
+          maxRotation: 0
+        }
+      },
+      y: {
+        grid: { color: '#edf0fb', lineWidth: 1 },
+        border: { display: false, dash: [4,4] },
+        ticks: {
+          color: '#6675b0',
+          callback: v => v + '%',
+          font: { weight: '700', size: 10 },
+          stepSize: 5
+        },
+        min: 15,
+        max: 42
+      }
+    }
+  }
+});
+
+// ─── SIZE DONUT ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('sizeDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['(A) 0-30','(B) 30-100','(C) >100'],
+    datasets: [{
+      data: [40.02, 37.91, 22.07],
+      backgroundColor: ['#1a237e','#29b6f6','#f57c00'],
+      borderWidth: 3,
+      borderColor: '#fff',
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    cutout: '66%',
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor:'#fff', borderColor:'#d8e2f8', borderWidth:1,
+        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` }
+      }
+    }
+  }
+});
+
+// ─── SPARKLINES ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('sparkMonth'), {
+  type:'line',
+  data:{
+    labels:['Apr','May','Jun','Jul','Aug','Sep','Nov'],
+    datasets:[{
+      data:[23.13,34.46,31.51,21.78,23.95,27.45,26.18],
+      borderColor:'#00897b', borderWidth:2.5,
+      pointRadius:[2,5,2,2,2,2,2],
+      pointBackgroundColor:'#00897b',
+      fill:true, backgroundColor:'rgba(0,137,123,.09)', tension:.4
+    }]
+  },
+  options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
+    scales:{x:{display:false},y:{display:false}},animation:{duration:1400}}
+});
+
+new Chart(document.getElementById('sparkCity'), {
+  type:'bar',
+  data:{
+    labels:['Pune','Mum','NMum','Blr','Thane','MP','Other','Ind','Khal'],
+    datasets:[{
+      data:[27.65,21.33,37.59,19.92,33.03,33.44,46.08,35.98,39.10],
+      backgroundColor:['#1a237e','#d32f2f','#039be5','#d32f2f','#f57c00','#f57c00','#00897b','#3949ab','#3949ab'],
+      borderRadius:3
+    }]
+  },
+  options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
+    scales:{x:{display:false},y:{display:false,min:15}},animation:{duration:1400}}
+});
+
+new Chart(document.getElementById('sparkTAT'), {
+  type:'bar',
+  data:{
+    labels:['Pune','Mum','NMum','Blr','Thane','MP','Other','Ind','Khal'],
+    datasets:[{
+      data:[157,213,135,189,131,151,116,177,183],
+      backgroundColor: ctx => {
+        const v = ctx.raw;
+        return v>190 ? '#d32f2f' : v>160 ? '#f57c00' : '#00897b';
+      },
+      borderRadius:3
+    }]
+  },
+  options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},
+    scales:{x:{display:false},y:{display:false,min:100}},animation:{duration:1400}}
+});
+
+// ─── Filter pills ──────────────────────────────────────────────────────────
+document.querySelectorAll('.fpill').forEach(p=>{
+  p.addEventListener('click',function(){
+    document.querySelectorAll('.fpill').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>
