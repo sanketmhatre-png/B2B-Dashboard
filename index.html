@@ -57,8 +57,14 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .refresh-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;}
 .refresh-btn:hover{background:rgba(255,255,255,.22);}
 
+/* ─── VIEW ALL PROJECTS BUTTON ─── */
+.view-all-btn{background:linear-gradient(135deg,#039be5,#29b6f6);border:1.5px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:900;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .22s;display:flex;align-items:center;gap:6px;white-space:nowrap;letter-spacing:.3px;box-shadow:0 2px 8px rgba(3,155,229,.35);}
+.view-all-btn:hover{background:linear-gradient(135deg,#0277bd,#039be5);transform:translateY(-1px);box-shadow:0 4px 14px rgba(3,155,229,.45);}
+.view-all-btn svg{width:13px;height:13px;flex-shrink:0;}
+
 /* ─── KPI ROW ─── */
-.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;}
+/* 7 columns now to include TAT Days */
+.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:16px;}
 .kpi{background:var(--surface);border-radius:14px;padding:16px 15px 13px;border:1.5px solid var(--border);box-shadow:var(--sh1);position:relative;overflow:hidden;cursor:default;transition:transform .18s,box-shadow .18s;animation:up .4s ease both;}
 .kpi:hover{transform:translateY(-3px);box-shadow:var(--sh2);}
 .kpi-bar{position:absolute;top:0;left:0;right:0;height:3.5px;border-radius:14px 14px 0 0;}
@@ -117,6 +123,11 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .drill-row{cursor:pointer;}
 .drill-row:hover td{background:#dde8ff!important;}
 .drill-icon{font-size:9px;color:var(--sky);margin-left:3px;}
+
+/* ─── TAT color helpers ─── */
+.tat-green{color:#00897b;font-weight:800;}
+.tat-amber{color:#f57c00;font-weight:800;}
+.tat-red{color:#d32f2f;font-weight:800;}
 
 /* ─── ANALYTICS ─── */
 .ana-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
@@ -188,6 +199,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .kpi:nth-child(1){animation-delay:.04s}.kpi:nth-child(2){animation-delay:.08s}
 .kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.16s}
 .kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.24s}
+.kpi:nth-child(7){animation-delay:.28s}
 </style>
 </head>
 <body>
@@ -246,10 +258,19 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       <span class="filter-label">To</span>
       <input type="date" class="filter-date-input" id="dateTo" onchange="applyFilters()">
     </div>
+    <div class="filter-sep"></div>
+    <!-- ★ NEW: View All Projects button -->
+    <button class="view-all-btn" onclick="openDrill('all','All Projects',0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      View All Projects
+    </button>
     <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
   </div>
 </div>
 
+<!-- KPI Row — 7 cards including Avg TAT Days -->
 <div class="kpi-row">
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div><div class="kpi-lbl">Total Projects</div><div class="kpi-val" id="kpiTotal" style="color:#1a237e">—</div><div class="kpi-hint">All-time pipeline</div></div>
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#81d4fa)"></div><div class="kpi-lbl">Installation Completed</div><div class="kpi-val" id="kpiCompleted" style="color:#039be5">—</div><div class="kpi-hint" id="kpiCompletedHint">—</div><span class="kpi-badge bu" id="kpiCompletedBadge"></span></div>
@@ -257,6 +278,8 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div><div class="kpi-lbl">Installation GM</div><div class="kpi-val" id="kpiInstGM" style="color:#00897b">—</div><div class="kpi-hint">Gross margin</div></div>
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div><div class="kpi-lbl">Booking GM</div><div class="kpi-val" id="kpiBookGM" style="color:#7c4dff">—</div><div class="kpi-hint">vs Installation delta</div><span class="kpi-badge bd" id="kpiDeltaBadge"></span></div>
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#1a237e)"></div><div class="kpi-lbl">Design GM</div><div class="kpi-val" id="kpiDesignGM" style="color:#3949ab">—</div><div class="kpi-hint">Design margin</div></div>
+  <!-- ★ NEW KPI: Avg TAT Days -->
+  <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#e65100,#ff8f00)"></div><div class="kpi-lbl">Avg TAT Days</div><div class="kpi-val" id="kpiAvgTAT" style="color:#e65100">—</div><div class="kpi-hint" id="kpiAvgTATHint">Booking → Install</div><span class="kpi-badge" id="kpiAvgTATBadge" style="background:#fff3e0;color:#e65100;"></span></div>
 </div>
 
 <div class="sec-grid">
@@ -293,11 +316,13 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 <div class="tbl-grid">
   <div class="card">
     <div class="ctitle">Monthly Performance <span style="font-size:9px;color:var(--sky);font-weight:700;text-transform:none;letter-spacing:0;margin-left:2px;">↗ click to drill through</span></div>
-    <table class="dtbl"><thead><tr><th>Month</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th></tr></thead><tbody id="monthlyTbody"></tbody></table>
+    <!-- ★ TAT Days column added -->
+    <table class="dtbl"><thead><tr><th>Month</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th></tr></thead><tbody id="monthlyTbody"></tbody></table>
   </div>
   <div class="card">
     <div class="ctitle">City-Wise Performance <span style="font-size:9px;color:var(--sky);font-weight:700;text-transform:none;letter-spacing:0;margin-left:2px;">↗ click to drill through</span></div>
-    <table class="dtbl"><thead><tr><th>City</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th></tr></thead><tbody id="cityTbody"></tbody></table>
+    <!-- ★ TAT Days column added -->
+    <table class="dtbl"><thead><tr><th>City</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th></tr></thead><tbody id="cityTbody"></tbody></table>
   </div>
 </div>
 
@@ -336,7 +361,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#f57c00,#ffd54f)"></div><div class="dt-kpi-lbl">Total Revenue</div><div class="dt-kpi-val" id="dtKpiRev" style="color:#f57c00">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div><div class="dt-kpi-lbl">Avg Install GM%</div><div class="dt-kpi-val" id="dtKpiIG" style="color:#00897b">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div><div class="dt-kpi-lbl">Avg Booking GM%</div><div class="dt-kpi-val" id="dtKpiBG" style="color:#7c4dff">—</div></div>
-  <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#039be5,#81d4fa)"></div><div class="dt-kpi-lbl">Avg TAT Days</div><div class="dt-kpi-val" id="dtKpiTAT" style="color:#039be5">—</div></div>
+  <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#e65100,#ff8f00)"></div><div class="dt-kpi-lbl">Avg TAT Days</div><div class="dt-kpi-val" id="dtKpiTAT" style="color:#e65100">—</div></div>
 </div>
 
 <div class="dt-table-wrap">
@@ -403,6 +428,7 @@ function num(v){if(v===undefined||v===null||v==="")return 0;return parseFloat(St
 function fmtN(v){if(v>=1e7)return(v/1e7).toFixed(2)+" Cr";if(v>=1e6)return(v/1e6).toFixed(2)+" M";if(v>=1e3)return(v/1e3).toFixed(2)+" K";return v.toFixed(0);}
 function fmtD(raw){if(!raw)return"—";const d=new Date(raw);if(!isNaN(d))return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});return raw;}
 function gmChip(p){const c=p>=30?"gm-high":p>=20?"gm-mid":"gm-low";return`<span class="gm-chip ${c}">${p.toFixed(2)}%</span>`;}
+function tatClass(v){return v>190?'tat-red':v>160?'tat-amber':v>0?'tat-green':'';}
 function isComplete(r){return(r[CONFIG.COL_STATUS]||"").trim().toLowerCase()===CONFIG.DONE_STATUS.trim().toLowerCase();}
 function normMonth(raw){
   if(!raw)return"Unknown";
@@ -465,6 +491,11 @@ function compute(rows){
   const instGMPct=revenue?instGMSum/revenue*100:0;
   const bookGMPct=revenue?bookGMSum/revenue*100:0;
   const designGMPct=revenue?designGMSum/revenue*100:0;
+
+  // ★ Overall avg TAT
+  const allTats=done.map(r=>num(r[C.COL_TAT])).filter(v=>v>0);
+  const avgTAT=allTats.length?Math.round(allTats.reduce((a,b)=>a+b,0)/allTats.length):0;
+
   const monthMap={};
   done.forEach(r=>{
     const m=normMonth(r[C.COL_MONTH]||r[C.COL_BOOKING_MONTH]);
@@ -496,7 +527,7 @@ function compute(rows){
   const segTotal=Object.values(segMap).reduce((a,b)=>a+b,0)||1;
   const segments=Object.entries(segMap).sort((a,b)=>b[1]-a[1]);
   const dates=done.map(r=>new Date(r[C.COL_MONTH])).filter(d=>!isNaN(d));
-  return{totalProjects,instCompleted,revenue,instGMPct,bookGMPct,designGMPct,
+  return{totalProjects,instCompleted,revenue,instGMPct,bookGMPct,designGMPct,avgTAT,
     months,monthMap,cities,cityMap,sizeA:sA,sizeB:sB,sizeC:sC,sizeTotal,segments,segTotal,
     minDate:dates.length?new Date(Math.min(...dates)):null,maxDate:dates.length?new Date(Math.max(...dates)):null};
 }
@@ -515,6 +546,22 @@ function renderKPIs(m){
   const db=document.getElementById('kpiDeltaBadge');
   db.textContent=(delta>=0?"▲ ":"▼ ")+Math.abs(delta).toFixed(2)+"%";
   db.className="kpi-badge "+(delta>=0?"bu":"bd");
+
+  // ★ Avg TAT Days KPI
+  const tatEl=document.getElementById('kpiAvgTAT');
+  const tatBadge=document.getElementById('kpiAvgTATBadge');
+  const tatHint=document.getElementById('kpiAvgTATHint');
+  tatEl.textContent=m.avgTAT||"—";
+  if(m.avgTAT){
+    const label=m.avgTAT>190?"▲ High":m.avgTAT>160?"~ Moderate":"✓ On Track";
+    const color=m.avgTAT>190?"#ffebee":m.avgTAT>160?"#fff3e0":"#e0f7f4";
+    const tc=m.avgTAT>190?"#c62828":m.avgTAT>160?"#e65100":"#00695c";
+    tatBadge.textContent=label;
+    tatBadge.style.background=color;
+    tatBadge.style.color=tc;
+    tatHint.textContent="Avg across all installs";
+    tatEl.style.color=m.avgTAT>190?"#d32f2f":m.avgTAT>160?"#e65100":"#00897b";
+  }
 }
 
 function renderBarChart(m){
@@ -559,6 +606,7 @@ function renderSegments(m){
   }).join('');
 }
 
+// ★ Monthly table now includes TAT Days column
 function renderMonthlyTable(m){
   const tbody=document.getElementById('monthlyTbody');
   let html=m.months.map(mo=>{
@@ -568,20 +616,27 @@ function renderMonthlyTable(m){
     const delta=(parseFloat(bP)-parseFloat(iP)).toFixed(2);
     const dc=parseFloat(delta)>=0?"dp":"dn";
     const dt=parseFloat(delta)>=0?"+"+delta:delta;
+    const tat=d.tatCount?Math.round(d.tatSum/d.tatCount):null;
+    const tatCls=tat?tatClass(tat):'';
     return`<tr class="drill-row" onclick="openDrill('month','${mo.replace(/'/g,"\\'")}',${d.leads.size})" title="Click — view ${d.leads.size} projects in ${mo}">
       <td class="clbl">${mo}<span class="drill-icon"> ↗</span></td>
-      <td>${d.leads.size}</td><td>${iP}%</td><td>${bP}%</td><td class="${dc}">${dt}%</td></tr>`;
+      <td>${d.leads.size}</td><td>${iP}%</td><td>${bP}%</td><td class="${dc}">${dt}%</td>
+      <td class="${tatCls}">${tat||"—"}</td></tr>`;
   }).join('');
   const tR=m.months.reduce((s,mo)=>s+m.monthMap[mo].rev,0);
   const tI=m.months.reduce((s,mo)=>s+m.monthMap[mo].instGM,0);
   const tB=m.months.reduce((s,mo)=>s+m.monthMap[mo].bookGM,0);
   const tL=new Set(m.months.flatMap(mo=>[...m.monthMap[mo].leads])).size;
+  const tTatS=m.months.reduce((s,mo)=>s+m.monthMap[mo].tatSum,0);
+  const tTatC=m.months.reduce((s,mo)=>s+m.monthMap[mo].tatCount,0);
+  const tTat=tTatC?Math.round(tTatS/tTatC):null;
   const tIP=tR?(tI/tR*100).toFixed(2):"0.00";
   const tBP=tR?(tB/tR*100).toFixed(2):"0.00";
-  html+=`<tr class="tr-tot"><td>TOTAL</td><td>${tL}</td><td>${tIP}%</td><td>${tBP}%</td><td>${(parseFloat(tBP)-parseFloat(tIP)).toFixed(2)}%</td></tr>`;
+  html+=`<tr class="tr-tot"><td>TOTAL</td><td>${tL}</td><td>${tIP}%</td><td>${tBP}%</td><td>${(parseFloat(tBP)-parseFloat(tIP)).toFixed(2)}%</td><td>${tTat||"—"}</td></tr>`;
   tbody.innerHTML=html;
 }
 
+// ★ City table now includes TAT Days column
 function renderCityTable(m){
   const tbody=document.getElementById('cityTbody');
   let html=m.cities.map(city=>{
@@ -591,17 +646,23 @@ function renderCityTable(m){
     const delta=(parseFloat(bP)-parseFloat(iP)).toFixed(2);
     const dc=parseFloat(delta)>=0?"dp":"dn";
     const dt=parseFloat(delta)>=0?"+"+delta:delta;
+    const tat=d.tatCount?Math.round(d.tatSum/d.tatCount):null;
+    const tatCls=tat?tatClass(tat):'';
     return`<tr class="drill-row" onclick="openDrill('city','${city.replace(/'/g,"\\'")}',${d.leads.size})" title="Click — view ${d.leads.size} projects in ${city}">
       <td class="clbl">${city}<span class="drill-icon"> ↗</span></td>
-      <td>${d.leads.size}</td><td>${iP}%</td><td>${bP}%</td><td class="${dc}">${dt}%</td></tr>`;
+      <td>${d.leads.size}</td><td>${iP}%</td><td>${bP}%</td><td class="${dc}">${dt}%</td>
+      <td class="${tatCls}">${tat||"—"}</td></tr>`;
   }).join('');
   const tR=m.cities.reduce((s,c)=>s+m.cityMap[c].rev,0);
   const tI=m.cities.reduce((s,c)=>s+m.cityMap[c].instGM,0);
   const tB=m.cities.reduce((s,c)=>s+m.cityMap[c].bookGM,0);
   const tL=new Set(m.cities.flatMap(c=>[...m.cityMap[c].leads])).size;
+  const tTatS=m.cities.reduce((s,c)=>s+m.cityMap[c].tatSum,0);
+  const tTatC=m.cities.reduce((s,c)=>s+m.cityMap[c].tatCount,0);
+  const tTat=tTatC?Math.round(tTatS/tTatC):null;
   const tIP=tR?(tI/tR*100).toFixed(2):"0.00";
   const tBP=tR?(tB/tR*100).toFixed(2):"0.00";
-  html+=`<tr class="tr-tot"><td>TOTAL</td><td>${tL}</td><td>${tIP}%</td><td>${tBP}%</td><td>${(parseFloat(tBP)-parseFloat(tIP)).toFixed(2)}%</td></tr>`;
+  html+=`<tr class="tr-tot"><td>TOTAL</td><td>${tL}</td><td>${tIP}%</td><td>${tBP}%</td><td>${(parseFloat(tBP)-parseFloat(tIP)).toFixed(2)}%</td><td>${tTat||"—"}</td></tr>`;
   tbody.innerHTML=html;
 }
 
@@ -645,21 +706,29 @@ let dtRows=[],dtFiltered=[],dtPage=1;
 const DT_PS=25;
 let dtSortState={col:null,asc:true};
 
+// ★ type='all' added — opens all completed projects, ignores city/date filters
 function openDrill(type,value,count){
   const base=getFiltered().filter(r=>isComplete(r));
-  if(type==='city')       dtRows=base.filter(r=>(r[CONFIG.COL_CITY]||"Unknown")===value);
-  else if(type==='month') dtRows=base.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===value);
+
+  if(type==='city')        dtRows=base.filter(r=>(r[CONFIG.COL_CITY]||"Unknown")===value);
+  else if(type==='month')  dtRows=base.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===value);
+  else if(type==='all'){
+    // All projects — ignore active filters, show everything completed
+    dtRows=allRows.filter(r=>isComplete(r));
+  }
   else dtRows=base;
 
   // header
   document.getElementById('dtTitle').textContent=value;
-  document.getElementById('dtSubtitle').textContent=`${type==='city'?'🏙️ City':'📅 Month'}: ${value} · ${dtRows.length} Projects`;
+  const typeLabel=type==='city'?'🏙️ City':type==='month'?'📅 Month':'📋 All';
+  document.getElementById('dtSubtitle').textContent=`${typeLabel}: ${value} · ${dtRows.length} Projects`;
   document.getElementById('dtBadge').textContent=`📊 ${dtRows.length} Projects`;
 
   // context pills
   const city=document.getElementById('cityDropdown').value;
-  let pills=`<div class="dt-pill hl"><span>${type==='city'?'🏙️':'📅'}</span><span class="dt-pill-lbl">${type==='city'?'City':'Month'}</span>&nbsp;<strong>${value}</strong></div>`;
-  if(city!=="All")pills+=`<div class="dt-pill"><span>🏙️</span><span class="dt-pill-lbl">Filter</span>&nbsp;<strong>${city}</strong></div>`;
+  let pills=`<div class="dt-pill hl"><span>${type==='city'?'🏙️':type==='month'?'📅':'📋'}</span><span class="dt-pill-lbl">${type==='city'?'City':type==='month'?'Month':'View'}</span>&nbsp;<strong>${value}</strong></div>`;
+  if(type!=='all'&&city!=="All")pills+=`<div class="dt-pill"><span>🏙️</span><span class="dt-pill-lbl">Filter</span>&nbsp;<strong>${city}</strong></div>`;
+  if(type==='all')pills+=`<div class="dt-pill"><span>ℹ️</span><span class="dt-pill-lbl">Scope</span>&nbsp;<strong>No Filters Applied</strong></div>`;
   pills+=`<div class="dt-pill"><span>✅</span><span class="dt-pill-lbl">Status</span>&nbsp;<strong>Installation Complete</strong></div>`;
   pills+=`<div class="dt-pill"><span>📁</span><span class="dt-pill-lbl">Projects</span>&nbsp;<strong>${dtRows.length}</strong></div>`;
   document.getElementById('dtContextBar').innerHTML=pills;
@@ -674,7 +743,10 @@ function openDrill(type,value,count){
   document.getElementById('dtKpiRev').textContent=fmtN(rev);
   document.getElementById('dtKpiIG').textContent=rev?(iGM/rev*100).toFixed(2)+"%":"—";
   document.getElementById('dtKpiBG').textContent=rev?(bGM/rev*100).toFixed(2)+"%":"—";
-  document.getElementById('dtKpiTAT').textContent=avgT||"—";
+  // ★ TAT KPI in drillthrough now color-coded
+  const tatEl=document.getElementById('dtKpiTAT');
+  tatEl.textContent=avgT||"—";
+  tatEl.style.color=avgT>190?'#d32f2f':avgT>160?'#e65100':'#00897b';
 
   // reset
   document.getElementById('dtSearch').value='';
