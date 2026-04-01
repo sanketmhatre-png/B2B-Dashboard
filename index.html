@@ -20,51 +20,101 @@
   --sh3:0 12px 40px rgba(26,35,126,.15);
 }
 body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padding:18px 22px 30px;min-height:100vh;}
-
 #pageDrillthrough{display:none;}
 
-/* ─── LOADING OVERLAY ─── */
+/* ─── LOADING ─── */
 #loadingOverlay{position:fixed;inset:0;background:rgba(238,242,251,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px;transition:opacity .4s;}
 #loadingOverlay.hidden{opacity:0;pointer-events:none;}
 .spinner{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;}
 .load-txt{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ─── ERROR BANNER ─── */
+/* ─── ERROR ─── */
 #errorBanner{display:none;background:#fff3e0;border:1.5px solid #ffb74d;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;font-weight:700;color:#e65100;}
 
-/* ─── HEADER ─── */
-.header{background:linear-gradient(135deg,#0d1757 0%,var(--navy) 50%,#1565c0 100%);border-radius:18px;padding:0;display:flex;align-items:stretch;margin-bottom:18px;box-shadow:var(--sh3);overflow:hidden;}
-.header-logo-block{background:rgba(255,255,255,.07);border-right:1px solid rgba(255,255,255,.1);padding:16px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+/* ════════ HEADER ════════ */
+.header{
+  background:linear-gradient(135deg,#0d1757 0%,var(--navy) 50%,#1565c0 100%);
+  border-radius:18px;display:flex;align-items:center;
+  margin-bottom:18px;box-shadow:var(--sh3);overflow:hidden;min-height:64px;padding:0;
+}
+.header-logo-block{
+  background:rgba(255,255,255,.07);border-right:1px solid rgba(255,255,255,.1);
+  padding:12px 18px;display:flex;align-items:center;flex-shrink:0;align-self:stretch;
+}
 .logo-svg-wrap{background:#fff;border-radius:10px;padding:5px 8px;display:flex;align-items:center;}
-.header-text{padding:14px 20px;flex:1;}
-.header-title{color:#fff;font-size:18px;font-weight:900;letter-spacing:.3px;line-height:1.25;}
+.header-text{
+  padding:0 18px;flex-shrink:0;border-right:1px solid rgba(255,255,255,.1);
+  align-self:stretch;display:flex;flex-direction:column;justify-content:center;
+}
+.header-title{color:#fff;font-size:15px;font-weight:900;letter-spacing:.3px;line-height:1.25;white-space:nowrap;}
 .header-title em{color:var(--sky2);font-style:normal;}
-.header-sub{color:var(--sky3);font-size:10.5px;font-weight:700;letter-spacing:.8px;margin-top:3px;text-transform:uppercase;}
-.header-right{padding:14px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
-
-/* ─── FILTERS ─── */
-.filter-group{display:flex;align-items:center;gap:6px;}
-.filter-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap;}
-.filter-select{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 28px 6px 11px;font-size:11px;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer;appearance:none;-webkit-appearance:none;outline:none;transition:all .2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.6)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;min-width:110px;}
+.header-sub{color:var(--sky3);font-size:9.5px;font-weight:700;letter-spacing:.7px;margin-top:2px;text-transform:uppercase;white-space:nowrap;}
+.header-controls{flex:1;display:flex;align-items:center;gap:10px;padding:0 18px;flex-wrap:nowrap;}
+.filter-sep{width:1px;height:28px;background:rgba(255,255,255,.18);flex-shrink:0;}
+.filter-group{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.filter-label{font-size:9.5px;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
+.filter-select{
+  background:rgba(255,255,255,.10);border:1.5px solid rgba(255,255,255,.2);
+  border-radius:8px;padding:6px 28px 6px 11px;font-size:11px;font-weight:800;
+  color:#fff;font-family:'Nunito',sans-serif;cursor:pointer;appearance:none;-webkit-appearance:none;outline:none;transition:all .2s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.6)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;min-width:120px;
+}
 .filter-select:hover{background-color:rgba(41,182,246,.2);border-color:var(--sky2);}
 .filter-select option{background:#1a237e;color:#fff;font-weight:700;}
-.filter-date-input{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#fff;font-family:'JetBrains Mono',monospace;cursor:pointer;outline:none;transition:all .2s;width:122px;}
+.filter-date-input{
+  background:rgba(255,255,255,.10);border:1.5px solid rgba(255,255,255,.2);
+  border-radius:8px;padding:6px 9px;font-size:10.5px;font-weight:700;
+  color:#fff;font-family:'JetBrains Mono',monospace;cursor:pointer;outline:none;transition:all .2s;width:118px;
+}
 .filter-date-input:hover{background-color:rgba(41,182,246,.2);border-color:var(--sky2);}
 .filter-date-input::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.6);cursor:pointer;}
-.filter-sep{width:1px;height:28px;background:rgba(255,255,255,.15);margin:0 4px;}
-.dbadge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:5px 12px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--sky3);white-space:nowrap;}
-.refresh-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;}
-.refresh-btn:hover{background:rgba(255,255,255,.22);}
-
-/* ─── VIEW ALL PROJECTS BUTTON ─── */
-.view-all-btn{background:linear-gradient(135deg,#039be5,#29b6f6);border:1.5px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:900;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .22s;display:flex;align-items:center;gap:6px;white-space:nowrap;letter-spacing:.3px;box-shadow:0 2px 8px rgba(3,155,229,.35);}
+.header-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;}
+.view-all-btn{
+  background:linear-gradient(135deg,#039be5,#29b6f6);border:1.5px solid rgba(255,255,255,.35);
+  border-radius:8px;padding:8px 16px;font-size:11px;font-weight:900;color:#fff;cursor:pointer;
+  font-family:'Nunito',sans-serif;transition:all .22s;display:flex;align-items:center;gap:6px;
+  white-space:nowrap;letter-spacing:.3px;box-shadow:0 2px 8px rgba(3,155,229,.35);flex-shrink:0;
+}
 .view-all-btn:hover{background:linear-gradient(135deg,#0277bd,#039be5);transform:translateY(-1px);box-shadow:0 4px 14px rgba(3,155,229,.45);}
 .view-all-btn svg{width:13px;height:13px;flex-shrink:0;}
+.refresh-btn{
+  background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);
+  border-radius:8px;padding:8px 14px;font-size:11px;font-weight:800;color:#fff;cursor:pointer;
+  font-family:'Nunito',sans-serif;transition:all .2s;white-space:nowrap;flex-shrink:0;
+}
+.refresh-btn:hover{background:rgba(255,255,255,.22);}
+
+/* ─── ACTIVE FILTER BAR ─── */
+#activeFilterBar{
+  display:none;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--surface);border:1.5px solid var(--border2);border-radius:12px;
+  padding:8px 14px;margin-bottom:14px;box-shadow:var(--sh1);
+}
+#activeFilterBar.visible{display:flex;}
+.af-label{font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap;}
+.af-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--navy);color:#fff;border-radius:20px;
+  padding:4px 10px 4px 12px;font-size:11px;font-weight:800;
+}
+.af-chip-x{
+  background:rgba(255,255,255,.25);border:none;border-radius:50%;
+  width:16px;height:16px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:10px;color:#fff;font-weight:900;line-height:1;transition:background .15s;
+  font-family:'Nunito',sans-serif;padding:0;
+}
+.af-chip-x:hover{background:rgba(255,255,255,.45);}
+.af-clear-all{
+  margin-left:4px;font-size:10px;font-weight:800;color:var(--red);cursor:pointer;
+  background:none;border:none;font-family:'Nunito',sans-serif;padding:3px 8px;
+  border-radius:6px;transition:background .15s;
+}
+.af-clear-all:hover{background:#ffebee;}
 
 /* ─── KPI ROW ─── */
-/* 7 columns now to include TAT Days */
-.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:16px;}
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;}
 .kpi{background:var(--surface);border-radius:14px;padding:16px 15px 13px;border:1.5px solid var(--border);box-shadow:var(--sh1);position:relative;overflow:hidden;cursor:default;transition:transform .18s,box-shadow .18s;animation:up .4s ease both;}
 .kpi:hover{transform:translateY(-3px);box-shadow:var(--sh2);}
 .kpi-bar{position:absolute;top:0;left:0;right:0;height:3.5px;border-radius:14px 14px 0 0;}
@@ -77,9 +127,12 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 
 /* ─── SECTION GRID ─── */
 .sec-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:14px;}
-.card{background:var(--surface);border-radius:14px;padding:18px 20px;border:1.5px solid var(--border);box-shadow:var(--sh1);animation:up .45s ease both;}
+.card{background:var(--surface);border-radius:14px;padding:18px 20px;border:1.5px solid var(--border);box-shadow:var(--sh1);animation:up .45s ease both;transition:border-color .2s,box-shadow .2s;}
+/* Card highlight when cross-filter active */
+.card.cf-active{border-color:var(--sky2);box-shadow:0 0 0 2px rgba(41,182,246,.18),var(--sh2);}
 .ctitle{font-size:10.5px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:1.1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .ctitle::before{content:'';width:3.5px;height:15px;background:linear-gradient(180deg,var(--sky2),var(--navy));border-radius:3px;flex-shrink:0;}
+.ctitle-hint{font-size:9px;color:var(--sky);font-weight:700;text-transform:none;letter-spacing:0;margin-left:2px;}
 .rp{display:flex;flex-direction:column;gap:14px;}
 .chart-outer{position:relative;width:100%;height:280px;}
 .clegend{display:flex;align-items:center;gap:18px;margin-bottom:12px;}
@@ -88,19 +141,32 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 
 /* ─── DONUT ─── */
 .donut-wrap{display:flex;align-items:center;gap:14px;}
-.donut-canvas{position:relative;width:120px;height:120px;flex-shrink:0;}
+.donut-canvas{position:relative;width:120px;height:120px;flex-shrink:0;cursor:pointer;}
 .donut-canvas canvas{position:absolute;inset:0;}
 .donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
 .donut-mid-val{font-size:20px;font-weight:900;color:var(--navy);line-height:1;}
 .donut-mid-lbl{font-size:8.5px;font-weight:800;color:var(--muted);letter-spacing:.5px;}
 .donut-leg{flex:1;}
-.dl-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.dl-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 8px;border-radius:8px;border-bottom:1px solid var(--border);
+  font-size:11px;cursor:pointer;transition:background .15s;
+}
 .dl-row:last-child{border-bottom:none;}
+.dl-row:hover{background:var(--skypale);}
+.dl-row.cf-selected{background:var(--skypale);outline:2px solid var(--sky2);outline-offset:-1px;}
+.dl-row.cf-dimmed{opacity:.35;}
 .dl-left{display:flex;align-items:center;gap:7px;color:var(--muted);font-weight:700;}
 .dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .dl-pct{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;}
-.segs{display:flex;flex-direction:column;gap:11px;}
-.seg-hd{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;font-weight:800;}
+
+/* ─── SEGMENTS ─── */
+.segs{display:flex;flex-direction:column;gap:10px;}
+.seg-item{border-radius:8px;padding:6px 8px;cursor:pointer;transition:background .15s;}
+.seg-item:hover{background:var(--skypale);}
+.seg-item.cf-selected{background:var(--skypale);outline:2px solid var(--sky2);outline-offset:-1px;}
+.seg-item.cf-dimmed{opacity:.35;}
+.seg-hd{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;font-weight:800;}
 .seg-nm{color:var(--muted);}
 .seg-bg{height:7px;background:var(--bg);border-radius:4px;overflow:hidden;}
 .seg-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
@@ -118,13 +184,9 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .clbl{font-family:'Nunito',sans-serif!important;font-weight:700;}
 .dp{color:var(--green)!important;font-weight:800;}
 .dn{color:var(--red)!important;font-weight:800;}
-
-/* ─── DRILL ROWS ─── */
 .drill-row{cursor:pointer;}
 .drill-row:hover td{background:#dde8ff!important;}
 .drill-icon{font-size:9px;color:var(--sky);margin-left:3px;}
-
-/* ─── TAT color helpers ─── */
 .tat-green{color:#00897b;font-weight:800;}
 .tat-amber{color:#f57c00;font-weight:800;}
 .tat-red{color:#d32f2f;font-weight:800;}
@@ -140,29 +202,26 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .mini-d{font-size:9.5px;color:var(--dim);margin-top:3px;font-weight:700;}
 .footer{background:var(--navy);border-radius:10px;text-align:center;padding:11px;color:var(--sky3);font-size:9.5px;font-weight:700;letter-spacing:.6px;font-family:'JetBrains Mono',monospace;}
 
-/* ════ DRILLTHROUGH PAGE ════ */
-.dt-header{background:linear-gradient(135deg,#0d1757 0%,var(--navy) 50%,#1565c0 100%);border-radius:18px;display:flex;align-items:stretch;margin-bottom:18px;box-shadow:var(--sh3);overflow:hidden;}
-.dt-back-btn{background:rgba(255,255,255,.1);border:none;border-right:1px solid rgba(255,255,255,.15);padding:0 22px;display:flex;align-items:center;gap:9px;color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:background .2s;white-space:nowrap;flex-shrink:0;}
+/* ════ DRILLTHROUGH ════ */
+.dt-header{background:linear-gradient(135deg,#0d1757 0%,var(--navy) 50%,#1565c0 100%);border-radius:18px;display:flex;align-items:center;margin-bottom:18px;box-shadow:var(--sh3);overflow:hidden;min-height:64px;}
+.dt-back-btn{background:rgba(255,255,255,.1);border:none;border-right:1px solid rgba(255,255,255,.15);padding:0 22px;height:64px;display:flex;align-items:center;gap:9px;color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:background .2s;white-space:nowrap;flex-shrink:0;}
 .dt-back-btn:hover{background:rgba(255,255,255,.22);}
-.dt-header-text{padding:14px 20px;flex:1;}
+.dt-header-text{padding:0 20px;flex:1;display:flex;flex-direction:column;justify-content:center;}
 .dt-header-title{color:#fff;font-size:16px;font-weight:900;letter-spacing:.3px;line-height:1.25;}
 .dt-header-title em{color:var(--sky2);font-style:normal;}
 .dt-header-sub{color:var(--sky3);font-size:10px;font-weight:700;letter-spacing:.8px;margin-top:3px;text-transform:uppercase;}
-.dt-header-right{padding:14px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-
+.dt-header-right{padding:0 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.dbadge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 12px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--sky3);white-space:nowrap;flex-shrink:0;}
 .dt-context-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .dt-pill{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1.5px solid var(--border2);border-radius:50px;padding:6px 14px;font-size:11px;font-weight:800;color:var(--navy);box-shadow:var(--sh1);}
 .dt-pill.hl{background:var(--navy);color:#fff;border-color:var(--navy);}
 .dt-pill-lbl{font-size:9.5px;font-weight:700;}
 .dt-pill.hl .dt-pill-lbl{color:var(--sky3);}
-
 .dt-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
 .dt-kpi{background:var(--surface);border-radius:12px;padding:13px 14px 11px;border:1.5px solid var(--border);box-shadow:var(--sh1);position:relative;overflow:hidden;}
 .dt-kpi-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;}
 .dt-kpi-lbl{font-size:8.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
 .dt-kpi-val{font-size:22px;font-weight:900;line-height:1;}
-.dt-kpi-hint{font-size:9px;color:var(--dim);margin-top:4px;font-weight:700;}
-
 .dt-table-wrap{background:var(--surface);border-radius:14px;padding:18px 20px;border:1.5px solid var(--border);box-shadow:var(--sh1);margin-bottom:14px;}
 .dt-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap;}
 .dt-search{background:var(--bg);border:1.5px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;color:var(--navy);font-family:'Nunito',sans-serif;outline:none;width:230px;transition:border-color .2s;}
@@ -186,7 +245,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .gm-mid{background:#fff8e1;color:#e65100;}
 .gm-low{background:#ffebee;color:#c62828;}
 .sz-chip{background:var(--skypale);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:800;color:var(--navy3);}
-
 .dt-pagination{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px;}
 .dt-page-info{font-size:10.5px;color:var(--muted);font-weight:700;}
 .dt-page-btns{display:flex;gap:5px;}
@@ -199,7 +257,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .kpi:nth-child(1){animation-delay:.04s}.kpi:nth-child(2){animation-delay:.08s}
 .kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.16s}
 .kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.24s}
-.kpi:nth-child(7){animation-delay:.28s}
 </style>
 </head>
 <body>
@@ -210,9 +267,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 </div>
 <div id="errorBanner"></div>
 
-<!-- ══════════════════════════
-     PAGE 1 — SUMMARY
-══════════════════════════ -->
+<!-- ══════════════════ PAGE 1 — SUMMARY ══════════════════ -->
 <div id="pageSummary">
 
 <div class="header">
@@ -238,11 +293,11 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
     </div>
   </div>
   <div class="header-text">
-    <div class="header-title">SSE-B2B <em>Installation GM</em> Analysis Report</div>
-    <div class="header-sub">B2B Solar Installation · Performance Dashboard · <span id="lastUpdated">Loading…</span></div>
+    <div class="header-title">SSE-B2B <em>Installation GM</em> Report</div>
+    <div class="header-sub">B2B Solar · <span id="lastUpdated">Loading…</span></div>
   </div>
-  <div class="header-right">
-    <div class="dbadge" id="dateRangeBadge">📅 Loading…</div>
+  <div class="header-controls">
+    <!-- City filter -->
     <div class="filter-group">
       <span class="filter-label">City</span>
       <select class="filter-select" id="cityDropdown" onchange="applyFilters()">
@@ -250,6 +305,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       </select>
     </div>
     <div class="filter-sep"></div>
+    <!-- Date range filters replacing the old date badge KPI -->
     <div class="filter-group">
       <span class="filter-label">From</span>
       <input type="date" class="filter-date-input" id="dateFrom" onchange="applyFilters()">
@@ -259,31 +315,37 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       <input type="date" class="filter-date-input" id="dateTo" onchange="applyFilters()">
     </div>
     <div class="filter-sep"></div>
-    <!-- ★ NEW: View All Projects button -->
-    <button class="view-all-btn" onclick="openDrill('all','All Projects',0)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-      View All Projects
-    </button>
-    <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
+    <div class="header-actions">
+      <button class="view-all-btn" onclick="openDrill('all','All Projects',0)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        View All Projects
+      </button>
+      <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
+    </div>
   </div>
 </div>
 
-<!-- KPI Row — 7 cards including Avg TAT Days -->
+<!-- Active cross-filter chip bar -->
+<div id="activeFilterBar">
+  <span class="af-label">🔍 Active Filters:</span>
+  <span id="afChips"></span>
+  <button class="af-clear-all" onclick="clearAllCrossFilters()">✕ Clear All</button>
+</div>
+
+<!-- KPI Row — 6 cards (removed date KPI, replaced with date filter in header) -->
 <div class="kpi-row">
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div><div class="kpi-lbl">Total Projects</div><div class="kpi-val" id="kpiTotal" style="color:#1a237e">—</div><div class="kpi-hint">All-time pipeline</div></div>
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#81d4fa)"></div><div class="kpi-lbl">Installation Completed</div><div class="kpi-val" id="kpiCompleted" style="color:#039be5">—</div><div class="kpi-hint" id="kpiCompletedHint">—</div><span class="kpi-badge bu" id="kpiCompletedBadge"></span></div>
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#f57c00,#ffd54f)"></div><div class="kpi-lbl">Revenue</div><div class="kpi-val" id="kpiRevenue" style="color:#f57c00">—</div><div class="kpi-hint">Installation Complete only</div></div>
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div><div class="kpi-lbl">Installation GM</div><div class="kpi-val" id="kpiInstGM" style="color:#00897b">—</div><div class="kpi-hint">Gross margin</div></div>
   <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div><div class="kpi-lbl">Booking GM</div><div class="kpi-val" id="kpiBookGM" style="color:#7c4dff">—</div><div class="kpi-hint">vs Installation delta</div><span class="kpi-badge bd" id="kpiDeltaBadge"></span></div>
-  <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#039be5,#1a237e)"></div><div class="kpi-lbl">Design GM</div><div class="kpi-val" id="kpiDesignGM" style="color:#3949ab">—</div><div class="kpi-hint">Design margin</div></div>
-  <!-- ★ NEW KPI: Avg TAT Days -->
-  <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#e65100,#ff8f00)"></div><div class="kpi-lbl">Avg TAT Days</div><div class="kpi-val" id="kpiAvgTAT" style="color:#e65100">—</div><div class="kpi-hint" id="kpiAvgTATHint">Booking → Install</div><span class="kpi-badge" id="kpiAvgTATBadge" style="background:#fff3e0;color:#e65100;"></span></div>
+  <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(90deg,#e65100,#ff8f00)"></div><div class="kpi-lbl">Avg Days</div><div class="kpi-val" id="kpiAvgTAT" style="color:#e65100">—</div><div class="kpi-hint" id="kpiAvgTATHint">Booking → Install</div><span class="kpi-badge" id="kpiAvgTATBadge" style="background:#fff3e0;color:#e65100;"></span></div>
 </div>
 
 <div class="sec-grid">
-  <div class="card">
+  <div class="card" id="cardBarChart">
     <div class="ctitle">Booking VS Installation GM %</div>
     <div class="clegend">
       <div class="cl-item"><div class="cl-dot" style="background:#1a237e"></div>Installation GM %</div>
@@ -292,22 +354,36 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
     <div class="chart-outer"><canvas id="barChart"></canvas></div>
   </div>
   <div class="rp">
-    <div class="card">
-      <div class="ctitle">Size Wise GM</div>
+    <!-- Size Wise Donut — cross-filterable -->
+    <div class="card" id="cardDonut">
+      <div class="ctitle">Size Wise GM <span class="ctitle-hint">↗ click segment to filter</span></div>
       <div class="donut-wrap">
-        <div class="donut-canvas">
+        <div class="donut-canvas" id="donutCanvasWrap">
           <canvas id="sizeDonut" width="120" height="120"></canvas>
-          <div class="donut-mid"><div class="donut-mid-val">3</div><div class="donut-mid-lbl">SEGMENTS</div></div>
+          <div class="donut-mid">
+            <div class="donut-mid-val" id="donutMidVal">3</div>
+            <div class="donut-mid-lbl" id="donutMidLbl">SEGMENTS</div>
+          </div>
         </div>
-        <div class="donut-leg">
-          <div class="dl-row"><div class="dl-left"><div class="dl-dot" style="background:#1a237e"></div>(A) 0–30</div><div class="dl-pct" id="sizeA" style="color:#1a237e">—</div></div>
-          <div class="dl-row"><div class="dl-left"><div class="dl-dot" style="background:#29b6f6"></div>(B) 30–100</div><div class="dl-pct" id="sizeB" style="color:#039be5">—</div></div>
-          <div class="dl-row"><div class="dl-left"><div class="dl-dot" style="background:#f57c00"></div>(C) &gt;100</div><div class="dl-pct" id="sizeC" style="color:#f57c00">—</div></div>
+        <div class="donut-leg" id="donutLegend">
+          <div class="dl-row" id="dlA" onclick="toggleSizeFilter('A')">
+            <div class="dl-left"><div class="dl-dot" style="background:#1a237e"></div>(A) 0–30</div>
+            <div class="dl-pct" id="sizeA" style="color:#1a237e">—</div>
+          </div>
+          <div class="dl-row" id="dlB" onclick="toggleSizeFilter('B')">
+            <div class="dl-left"><div class="dl-dot" style="background:#29b6f6"></div>(B) 30–100</div>
+            <div class="dl-pct" id="sizeB" style="color:#039be5">—</div>
+          </div>
+          <div class="dl-row" id="dlC" onclick="toggleSizeFilter('C')">
+            <div class="dl-left"><div class="dl-dot" style="background:#f57c00"></div>(C) &gt;100</div>
+            <div class="dl-pct" id="sizeC" style="color:#f57c00">—</div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="card">
-      <div class="ctitle">Segment Type</div>
+    <!-- Segment Type — cross-filterable -->
+    <div class="card" id="cardSegment">
+      <div class="ctitle">Segment Type <span class="ctitle-hint">↗ click to filter</span></div>
       <div class="segs" id="segmentBars"></div>
     </div>
   </div>
@@ -315,32 +391,27 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 
 <div class="tbl-grid">
   <div class="card">
-    <div class="ctitle">Monthly Performance <span style="font-size:9px;color:var(--sky);font-weight:700;text-transform:none;letter-spacing:0;margin-left:2px;">↗ click to drill through</span></div>
-    <!-- ★ TAT Days column added -->
-    <table class="dtbl"><thead><tr><th>Month</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th></tr></thead><tbody id="monthlyTbody"></tbody></table>
+    <div class="ctitle">Monthly Performance <span class="ctitle-hint">↗ click to drill through</span></div>
+    <table class="dtbl"><thead><tr><th>Month</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>Days</th></tr></thead><tbody id="monthlyTbody"></tbody></table>
   </div>
   <div class="card">
-    <div class="ctitle">City-Wise Performance <span style="font-size:9px;color:var(--sky);font-weight:700;text-transform:none;letter-spacing:0;margin-left:2px;">↗ click to drill through</span></div>
-    <!-- ★ TAT Days column added -->
-    <table class="dtbl"><thead><tr><th>City</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>TAT Days</th></tr></thead><tbody id="cityTbody"></tbody></table>
+    <div class="ctitle">City-Wise Performance <span class="ctitle-hint">↗ click to drill through</span></div>
+    <table class="dtbl"><thead><tr><th>City</th><th>Projects</th><th>Install GM%</th><th>Booking GM%</th><th>B-I Delta</th><th>Days</th></tr></thead><tbody id="cityTbody"></tbody></table>
   </div>
 </div>
 
 <div class="ana-grid">
   <div class="mini"><div class="mini-t">Best Performing Month</div><div class="mini-v" id="bestMonth" style="color:#00897b">—</div><div class="mini-c up" id="bestMonthGM">—</div><div class="mini-d">Highest margin in the period</div><canvas id="sparkMonth" height="46" style="margin-top:12px"></canvas></div>
   <div class="mini"><div class="mini-t">Top City by Install GM%</div><div class="mini-v" id="topCity" style="color:#1a237e">—</div><div class="mini-c up" id="topCityGM">—</div><div class="mini-d">Highest installation margin city</div><canvas id="sparkCity" height="46" style="margin-top:12px"></canvas></div>
-  <div class="mini"><div class="mini-t">Avg TAT Days by City</div><div class="mini-v" id="avgTAT" style="color:#039be5">—</div><div class="mini-c dn" id="worstTAT">—</div><div class="mini-d">Green &lt;160 · Amber 160–190 · Red &gt;190</div><canvas id="sparkTAT" height="46" style="margin-top:12px"></canvas></div>
+  <div class="mini"><div class="mini-t">Avg Days by City</div><div class="mini-v" id="avgTAT" style="color:#039be5">—</div><div class="mini-c dn" id="worstTAT">—</div><div class="mini-d">Green &lt;160 · Amber 160–190 · Red &gt;190</div><canvas id="sparkTAT" height="46" style="margin-top:12px"></canvas></div>
 </div>
 
 <div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; SSE-B2B INSTALLATION GM ANALYSIS &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
 </div><!-- /pageSummary -->
 
 
-<!-- ══════════════════════════
-     PAGE 2 — DRILLTHROUGH
-══════════════════════════ -->
+<!-- ══════════════════ PAGE 2 — DRILLTHROUGH ══════════════════ -->
 <div id="pageDrillthrough">
-
 <div class="dt-header">
   <button class="dt-back-btn" onclick="closeDrillthrough()">
     <span style="font-size:20px;line-height:1;">←</span> Back to Summary
@@ -353,17 +424,14 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
     <div class="dbadge" id="dtBadge">📊 —</div>
   </div>
 </div>
-
 <div class="dt-context-bar" id="dtContextBar"></div>
-
 <div class="dt-kpi-row">
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div><div class="dt-kpi-lbl">Projects</div><div class="dt-kpi-val" id="dtKpiProj" style="color:#1a237e">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#f57c00,#ffd54f)"></div><div class="dt-kpi-lbl">Total Revenue</div><div class="dt-kpi-val" id="dtKpiRev" style="color:#f57c00">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div><div class="dt-kpi-lbl">Avg Install GM%</div><div class="dt-kpi-val" id="dtKpiIG" style="color:#00897b">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div><div class="dt-kpi-lbl">Avg Booking GM%</div><div class="dt-kpi-val" id="dtKpiBG" style="color:#7c4dff">—</div></div>
-  <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#e65100,#ff8f00)"></div><div class="dt-kpi-lbl">Avg TAT Days</div><div class="dt-kpi-val" id="dtKpiTAT" style="color:#e65100">—</div></div>
+  <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#e65100,#ff8f00)"></div><div class="dt-kpi-lbl">Avg Days</div><div class="dt-kpi-val" id="dtKpiTAT" style="color:#e65100">—</div></div>
 </div>
-
 <div class="dt-table-wrap">
   <div class="dt-toolbar">
     <div class="ctitle" style="margin-bottom:0;">Project-Wise Breakdown</div>
@@ -375,16 +443,16 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   <div class="dt-outer">
     <table class="dt-tbl">
       <thead><tr>
-        <th onclick="dtSort('lead')"     id="th-lead">Lead Name <span class="sa">↕</span></th>
-        <th onclick="dtSort('size')"     id="th-size">Size (kW) <span class="sa">↕</span></th>
-        <th onclick="dtSort('city')"     id="th-city">City <span class="sa">↕</span></th>
-        <th onclick="dtSort('bracket')"  id="th-bracket">Size Bracket <span class="sa">↕</span></th>
-        <th onclick="dtSort('igm')"      id="th-igm">Install GM% <span class="sa">↕</span></th>
-        <th onclick="dtSort('bgm')"      id="th-bgm">Booking GM% <span class="sa">↕</span></th>
-        <th onclick="dtSort('rev')"      id="th-rev">Revenue <span class="sa">↕</span></th>
-        <th onclick="dtSort('bdate')"    id="th-bdate">Booking Date <span class="sa">↕</span></th>
-        <th onclick="dtSort('idate')"    id="th-idate">Installed Date <span class="sa">↕</span></th>
-        <th onclick="dtSort('tat')"      id="th-tat">TAT Days <span class="sa">↕</span></th>
+        <th onclick="dtSort('lead')"    id="th-lead">Lead Name <span class="sa">↕</span></th>
+        <th onclick="dtSort('size')"    id="th-size">Size (kW) <span class="sa">↕</span></th>
+        <th onclick="dtSort('city')"    id="th-city">City <span class="sa">↕</span></th>
+        <th onclick="dtSort('bracket')" id="th-bracket">Size Bracket <span class="sa">↕</span></th>
+        <th onclick="dtSort('igm')"     id="th-igm">Install GM% <span class="sa">↕</span></th>
+        <th onclick="dtSort('bgm')"     id="th-bgm">Booking GM% <span class="sa">↕</span></th>
+        <th onclick="dtSort('rev')"     id="th-rev">Revenue <span class="sa">↕</span></th>
+        <th onclick="dtSort('bdate')"   id="th-bdate">Booking Date <span class="sa">↕</span></th>
+        <th onclick="dtSort('idate')"   id="th-idate">Installed Date <span class="sa">↕</span></th>
+        <th onclick="dtSort('tat')"     id="th-tat">Days <span class="sa">↕</span></th>
       </tr></thead>
       <tbody id="dtTbody"></tbody>
     </table>
@@ -394,15 +462,14 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
     <div class="dt-page-btns" id="dtPageBtns"></div>
   </div>
 </div>
-
 <div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; PROJECT WISE DRILLTHROUGH &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
 </div><!-- /pageDrillthrough -->
 
 
 <script>
-// ════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  CONFIG
-// ════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 const CONFIG={
   SHEET_URL:"https://docs.google.com/spreadsheets/d/e/2PACX-1vRQmnTI4dwwY2KuhEk-jNub-Xlbw8tC3Xg3IVKq-1DG3D3WE0eGHkihOU1nVwSPYacVPTSdxX543IZq/pub?gid=0&single=true&output=csv",
   COL_LEAD:"Lead Name",COL_STATUS:"Installation Status",COL_REVENUE:"Revenue",
@@ -423,7 +490,15 @@ Chart.defaults.borderColor='#dce4f8';
 let barCI=null,donutI=null,spkMI=null,spkCI=null,spkTI=null;
 let allRows=[];
 
-// ── helpers ──
+// ═══ CROSS-FILTER STATE ═══
+// activeSizeFilter: null | 'A' | 'B' | 'C'
+// activeSegFilter:  null | string (segment name)
+let activeSizeFilter = null;
+let activeSegFilter  = null;
+
+// ═══════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════
 function num(v){if(v===undefined||v===null||v==="")return 0;return parseFloat(String(v).replace(/[^0-9.\-]/g,""))||0;}
 function fmtN(v){if(v>=1e7)return(v/1e7).toFixed(2)+" Cr";if(v>=1e6)return(v/1e6).toFixed(2)+" M";if(v>=1e3)return(v/1e3).toFixed(2)+" K";return v.toFixed(0);}
 function fmtD(raw){if(!raw)return"—";const d=new Date(raw);if(!isNaN(d))return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});return raw;}
@@ -439,12 +514,44 @@ function normMonth(raw){
 function mKey(m){const d=new Date("1 "+m);return isNaN(d)?0:d.getTime();}
 function parseDt(raw){
   if(!raw)return null;
+  if(/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(String(raw).trim())){
+    const parts=String(raw).trim().split(/[-\/]/);
+    return new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+  }
   const d=new Date(raw);if(!isNaN(d))return d;
   const d2=new Date("1 "+raw);if(!isNaN(d2))return d2;
   return null;
 }
 
-// ── parse CSV ──
+// ─── Size bracket helper ───
+function getSizeBracket(r){
+  const C=CONFIG;
+  const b=(r[C.COL_SIZE_BRACKET]||"").toUpperCase();
+  if(b.includes("(A)")||b.startsWith("A"))return"A";
+  if(b.includes("(B)")||b.startsWith("B"))return"B";
+  if(b.includes("(C)")||b.startsWith("C"))return"C";
+  const kw=num(r[C.COL_SIZE]);
+  if(kw>0&&kw<=30)return"A";
+  if(kw>30&&kw<=100)return"B";
+  if(kw>100)return"C";
+  return"";
+}
+
+// ─── TAT: Installed Date − Booking Date in days ───
+function calcTAT(row){
+  const C=CONFIG;
+  const instRaw=row[C.COL_INST_DATE]||row[C.COL_MONTH]||"";
+  const bookRaw=row[C.COL_BOOKING_DATE]||row[C.COL_BOOKING_MONTH]||"";
+  if(instRaw&&bookRaw){
+    const instD=parseDt(instRaw),bookD=parseDt(bookRaw);
+    if(instD&&bookD&&!isNaN(instD)&&!isNaN(bookD)){
+      const diff=Math.round((instD-bookD)/(1000*60*60*24));
+      if(diff>=0)return diff;
+    }
+  }
+  const s=num(row[C.COL_TAT]);return s>0?s:null;
+}
+
 function parseCSV(text){
   const lines=text.trim().split(/\r?\n/);if(lines.length<2)return[];
   const split=line=>{const res=[];let cur="";let inQ=false;
@@ -453,33 +560,116 @@ function parseCSV(text){
   const hd=split(lines[0]);
   return lines.slice(1).map(l=>{const v=split(l);return Object.fromEntries(hd.map((h,i)=>[h.trim(),(v[i]||"").trim()]));}).filter(r=>Object.values(r).some(x=>x!==""));
 }
-
-// ── fetch ──
 async function fetchSheetData(){const r=await fetch(CONFIG.SHEET_URL+"&cachebust="+Date.now());if(!r.ok)throw new Error("HTTP "+r.status);return parseCSV(await r.text());}
 
-// ── filters ──
+// ═══════════════════════════════════════════════
+//  FILTERING — header filters + cross filters
+// ═══════════════════════════════════════════════
 function getFiltered(){
   const city=document.getElementById('cityDropdown').value;
   const df=document.getElementById('dateFrom').value;
   const dt=document.getElementById('dateTo').value;
   return allRows.filter(r=>{
+    // City
     if(city!=="All"&&r[CONFIG.COL_CITY]!==city)return false;
-    if(df||dt){const raw=r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH];const d=parseDt(raw);if(!d)return false;
-      if(df&&d<new Date(df))return false;if(dt&&d>new Date(dt+"T23:59:59"))return false;}
+    // Date range
+    if(df||dt){
+      const raw=r[CONFIG.COL_INST_DATE]||r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_DATE]||r[CONFIG.COL_BOOKING_MONTH];
+      const d=parseDt(raw);if(!d)return false;
+      if(df&&d<new Date(df))return false;
+      if(dt&&d>new Date(dt+"T23:59:59"))return false;
+    }
+    // Cross-filter: size bracket
+    if(activeSizeFilter){
+      if(getSizeBracket(r)!==activeSizeFilter)return false;
+    }
+    // Cross-filter: segment
+    if(activeSegFilter){
+      if((r[CONFIG.COL_SEGMENT]||"Other")!==activeSegFilter)return false;
+    }
     return true;
   });
 }
-function applyFilters(){const f=getFiltered();const m=compute(f);renderKPIs(m);renderBarChart(m);renderDonut(m);renderSegments(m);renderMonthlyTable(m);renderCityTable(m);renderAnalytics(m);}
-function populateCities(cities){const s=document.getElementById('cityDropdown');s.innerHTML='<option value="All">All Cities</option>';cities.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o);});}
+
+function applyFilters(){
+  const f=getFiltered();
+  const m=compute(f);
+  renderKPIs(m);renderBarChart(m);renderDonut(m);renderSegments(m);
+  renderMonthlyTable(m);renderCityTable(m);renderAnalytics(m);
+  renderActiveFilterBar();
+}
+
+function populateCities(cities){
+  const s=document.getElementById('cityDropdown');
+  s.innerHTML='<option value="All">All Cities</option>';
+  cities.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o);});
+}
 function populateDates(rows){
-  const dates=rows.map(r=>parseDt(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])).filter(Boolean);
+  const dates=rows.map(r=>parseDt(r[CONFIG.COL_INST_DATE]||r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_DATE]||r[CONFIG.COL_BOOKING_MONTH])).filter(Boolean);
   if(!dates.length)return;
   const fmt=d=>d.toISOString().split('T')[0];
   document.getElementById('dateFrom').value=fmt(new Date(Math.min(...dates)));
   document.getElementById('dateTo').value=fmt(new Date(Math.max(...dates)));
 }
 
-// ── compute ──
+// ═══════════════════════════════════════════════
+//  CROSS-FILTER TOGGLES
+// ═══════════════════════════════════════════════
+function toggleSizeFilter(bracket){
+  activeSizeFilter = activeSizeFilter===bracket ? null : bracket;
+  applyFilters();
+}
+function toggleSegFilter(segName){
+  activeSegFilter = activeSegFilter===segName ? null : segName;
+  applyFilters();
+}
+function clearAllCrossFilters(){
+  activeSizeFilter=null;
+  activeSegFilter=null;
+  applyFilters();
+}
+
+// ─── Render the active filter chip bar ───
+function renderActiveFilterBar(){
+  const bar=document.getElementById('activeFilterBar');
+  const chips=document.getElementById('afChips');
+  let html='';
+  if(activeSizeFilter){
+    const labels={'A':'Size (A) 0–30 kW','B':'Size (B) 30–100 kW','C':'Size (C) >100 kW'};
+    html+=`<span class="af-chip">📐 ${labels[activeSizeFilter]}<button class="af-chip-x" onclick="toggleSizeFilter('${activeSizeFilter}')">✕</button></span>`;
+  }
+  if(activeSegFilter){
+    html+=`<span class="af-chip">🏷️ ${activeSegFilter}<button class="af-chip-x" onclick="toggleSegFilter('${activeSegFilter.replace(/'/g,"\\'")}')">✕</button></span>`;
+  }
+  chips.innerHTML=html;
+  if(activeSizeFilter||activeSegFilter){
+    bar.classList.add('visible');
+  } else {
+    bar.classList.remove('visible');
+  }
+  // Highlight card borders when active
+  document.getElementById('cardDonut').classList.toggle('cf-active', !!activeSizeFilter);
+  document.getElementById('cardSegment').classList.toggle('cf-active', !!activeSegFilter);
+}
+
+// ─── Update donut legend row styles ───
+function updateDonutLegStyles(){
+  ['A','B','C'].forEach(k=>{
+    const el=document.getElementById('dl'+k);
+    if(!el)return;
+    if(activeSizeFilter===null){
+      el.classList.remove('cf-selected','cf-dimmed');
+    } else if(activeSizeFilter===k){
+      el.classList.add('cf-selected');el.classList.remove('cf-dimmed');
+    } else {
+      el.classList.add('cf-dimmed');el.classList.remove('cf-selected');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  COMPUTE
+// ═══════════════════════════════════════════════
 function compute(rows){
   const C=CONFIG,done=rows.filter(r=>isComplete(r));
   const totalProjects=new Set(rows.map(r=>r[C.COL_LEAD])).size;
@@ -487,13 +677,9 @@ function compute(rows){
   const revenue=done.reduce((s,r)=>s+num(r[C.COL_REVENUE]),0);
   const instGMSum=done.reduce((s,r)=>s+num(r[C.COL_INST_GM]),0);
   const bookGMSum=done.reduce((s,r)=>s+num(r[C.COL_BOOK_GM]),0);
-  const designGMSum=done.reduce((s,r)=>s+num(r[C.COL_DESIGN_GM]),0);
   const instGMPct=revenue?instGMSum/revenue*100:0;
   const bookGMPct=revenue?bookGMSum/revenue*100:0;
-  const designGMPct=revenue?designGMSum/revenue*100:0;
-
-  // ★ Overall avg TAT
-  const allTats=done.map(r=>num(r[C.COL_TAT])).filter(v=>v>0);
+  const allTats=done.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
   const avgTAT=allTats.length?Math.round(allTats.reduce((a,b)=>a+b,0)/allTats.length):0;
 
   const monthMap={};
@@ -502,37 +688,39 @@ function compute(rows){
     if(!monthMap[m])monthMap[m]={leads:new Set(),rev:0,instGM:0,bookGM:0,tatSum:0,tatCount:0};
     monthMap[m].leads.add(r[C.COL_LEAD]);monthMap[m].rev+=num(r[C.COL_REVENUE]);
     monthMap[m].instGM+=num(r[C.COL_INST_GM]);monthMap[m].bookGM+=num(r[C.COL_BOOK_GM]);
-    if(C.COL_TAT&&r[C.COL_TAT]){monthMap[m].tatSum+=num(r[C.COL_TAT]);monthMap[m].tatCount++;}
+    const t=calcTAT(r);if(t!==null&&t>0){monthMap[m].tatSum+=t;monthMap[m].tatCount++;}
   });
   const months=Object.keys(monthMap).sort((a,b)=>mKey(b)-mKey(a));
+
   const cityMap={};
   done.forEach(r=>{
     const c=r[C.COL_CITY]||"Unknown";
     if(!cityMap[c])cityMap[c]={leads:new Set(),rev:0,instGM:0,bookGM:0,tatSum:0,tatCount:0};
     cityMap[c].leads.add(r[C.COL_LEAD]);cityMap[c].rev+=num(r[C.COL_REVENUE]);
     cityMap[c].instGM+=num(r[C.COL_INST_GM]);cityMap[c].bookGM+=num(r[C.COL_BOOK_GM]);
-    if(C.COL_TAT&&r[C.COL_TAT]){cityMap[c].tatSum+=num(r[C.COL_TAT]);cityMap[c].tatCount++;}
+    const t=calcTAT(r);if(t!==null&&t>0){cityMap[c].tatSum+=t;cityMap[c].tatCount++;}
   });
   const cities=Object.keys(cityMap).sort((a,b)=>cityMap[b].leads.size-cityMap[a].leads.size);
+
+  // Size breakdown from ALL completed rows filtered by header only (not cross-filter on size)
+  // So donut always shows full picture; cross-filter highlights
   let sA=0,sB=0,sC=0;
-  done.forEach(r=>{
-    const b=(r[C.COL_SIZE_BRACKET]||"").toUpperCase();
-    if(b.includes("(A)")||b.startsWith("A"))sA++;
-    else if(b.includes("(B)")||b.startsWith("B"))sB++;
-    else if(b.includes("(C)")||b.startsWith("C"))sC++;
-    else{const kw=num(r[C.COL_SIZE]);if(kw>0&&kw<=30)sA++;else if(kw>30&&kw<=100)sB++;else if(kw>100)sC++;}
-  });
+  done.forEach(r=>{const k=getSizeBracket(r);if(k==='A')sA++;else if(k==='B')sB++;else if(k==='C')sC++;});
   const sizeTotal=sA+sB+sC||1;
+
   const segMap={};done.forEach(r=>{const s=r[C.COL_SEGMENT]||"Other";segMap[s]=(segMap[s]||0)+1;});
   const segTotal=Object.values(segMap).reduce((a,b)=>a+b,0)||1;
   const segments=Object.entries(segMap).sort((a,b)=>b[1]-a[1]);
-  const dates=done.map(r=>new Date(r[C.COL_MONTH])).filter(d=>!isNaN(d));
-  return{totalProjects,instCompleted,revenue,instGMPct,bookGMPct,designGMPct,avgTAT,
+
+  const dates=done.map(r=>parseDt(r[C.COL_INST_DATE]||r[C.COL_MONTH]||r[C.COL_BOOKING_DATE]||r[C.COL_BOOKING_MONTH])).filter(d=>d&&!isNaN(d));
+  return{totalProjects,instCompleted,revenue,instGMPct,bookGMPct,avgTAT,
     months,monthMap,cities,cityMap,sizeA:sA,sizeB:sB,sizeC:sC,sizeTotal,segments,segTotal,
     minDate:dates.length?new Date(Math.min(...dates)):null,maxDate:dates.length?new Date(Math.max(...dates)):null};
 }
 
-// ── render summary ──
+// ═══════════════════════════════════════════════
+//  RENDER FUNCTIONS
+// ═══════════════════════════════════════════════
 function renderKPIs(m){
   document.getElementById('kpiTotal').textContent=m.totalProjects;
   document.getElementById('kpiCompleted').textContent=m.instCompleted;
@@ -541,13 +729,10 @@ function renderKPIs(m){
   document.getElementById('kpiRevenue').textContent=fmtN(m.revenue);
   document.getElementById('kpiInstGM').textContent=m.instGMPct.toFixed(2)+"%";
   document.getElementById('kpiBookGM').textContent=m.bookGMPct.toFixed(2)+"%";
-  document.getElementById('kpiDesignGM').textContent=m.designGMPct.toFixed(2)+"%";
   const delta=m.bookGMPct-m.instGMPct;
   const db=document.getElementById('kpiDeltaBadge');
   db.textContent=(delta>=0?"▲ ":"▼ ")+Math.abs(delta).toFixed(2)+"%";
   db.className="kpi-badge "+(delta>=0?"bu":"bd");
-
-  // ★ Avg TAT Days KPI
   const tatEl=document.getElementById('kpiAvgTAT');
   const tatBadge=document.getElementById('kpiAvgTATBadge');
   const tatHint=document.getElementById('kpiAvgTATHint');
@@ -556,10 +741,8 @@ function renderKPIs(m){
     const label=m.avgTAT>190?"▲ High":m.avgTAT>160?"~ Moderate":"✓ On Track";
     const color=m.avgTAT>190?"#ffebee":m.avgTAT>160?"#fff3e0":"#e0f7f4";
     const tc=m.avgTAT>190?"#c62828":m.avgTAT>160?"#e65100":"#00695c";
-    tatBadge.textContent=label;
-    tatBadge.style.background=color;
-    tatBadge.style.color=tc;
-    tatHint.textContent="Avg across all installs";
+    tatBadge.textContent=label;tatBadge.style.background=color;tatBadge.style.color=tc;
+    tatHint.textContent="Booking → Installed (days)";
     tatEl.style.color=m.avgTAT>190?"#d32f2f":m.avgTAT>160?"#e65100":"#00897b";
   }
 }
@@ -588,25 +771,81 @@ function renderBarChart(m){
 }
 
 function renderDonut(m){
-  const pA=(m.sizeA/m.sizeTotal*100).toFixed(2),pB=(m.sizeB/m.sizeTotal*100).toFixed(2),pC=(m.sizeC/m.sizeTotal*100).toFixed(2);
-  document.getElementById('sizeA').textContent=pA+"%";document.getElementById('sizeB').textContent=pB+"%";document.getElementById('sizeC').textContent=pC+"%";
+  const pA=(m.sizeA/m.sizeTotal*100).toFixed(2);
+  const pB=(m.sizeB/m.sizeTotal*100).toFixed(2);
+  const pC=(m.sizeC/m.sizeTotal*100).toFixed(2);
+  document.getElementById('sizeA').textContent=pA+"%";
+  document.getElementById('sizeB').textContent=pB+"%";
+  document.getElementById('sizeC').textContent=pC+"%";
+
+  // Adjust opacity of slices when a cross-filter is active
+  const alphas = activeSizeFilter
+    ? ['A','B','C'].map(k=>activeSizeFilter===k ? 1 : 0.2)
+    : [1,1,1];
+
   if(donutI)donutI.destroy();
-  donutI=new Chart(document.getElementById('sizeDonut'),{type:'doughnut',
-    data:{labels:['(A) 0-30','(B) 30-100','(C) >100'],datasets:[{data:[pA,pB,pC],backgroundColor:['#1a237e','#29b6f6','#f57c00'],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},
-    options:{cutout:'66%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#d8e2f8',borderWidth:1,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}}}}
+  donutI=new Chart(document.getElementById('sizeDonut'),{
+    type:'doughnut',
+    data:{
+      labels:['(A) 0-30','(B) 30-100','(C) >100'],
+      datasets:[{
+        data:[pA,pB,pC],
+        backgroundColor:[
+          `rgba(26,35,126,${alphas[0]})`,
+          `rgba(41,182,246,${alphas[1]})`,
+          `rgba(245,124,0,${alphas[2]})`
+        ],
+        borderWidth:3,borderColor:'#fff',hoverOffset:6
+      }]
+    },
+    options:{
+      cutout:'66%',responsive:true,maintainAspectRatio:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#fff',borderColor:'#d8e2f8',borderWidth:1,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}}
+      },
+      onClick:(evt,elements)=>{
+        if(!elements.length)return;
+        const idx=elements[0].index;
+        const brackets=['A','B','C'];
+        toggleSizeFilter(brackets[idx]);
+      }
+    }
   });
+
+  // Update donut center text when filter active
+  const midVal=document.getElementById('donutMidVal');
+  const midLbl=document.getElementById('donutMidLbl');
+  if(activeSizeFilter){
+    const labels={'A':'0–30 kW','B':'30–100 kW','C':'>100 kW'};
+    midVal.textContent=activeSizeFilter;
+    midLbl.textContent=labels[activeSizeFilter];
+  } else {
+    midVal.textContent='3';
+    midLbl.textContent='SEGMENTS';
+  }
+
+  updateDonutLegStyles();
 }
 
 const SC=['linear-gradient(90deg,#1a237e,#3949ab)','linear-gradient(90deg,#039be5,#81d4fa)','linear-gradient(90deg,#00897b,#4db6ac)','linear-gradient(90deg,#7c4dff,#b39ddb)','linear-gradient(90deg,#f57c00,#ffd54f)','linear-gradient(90deg,#d32f2f,#ef9a9a)'];
 const STC=['#1a237e','#039be5','#00897b','#7c4dff','#f57c00','#d32f2f'];
+
 function renderSegments(m){
-  document.getElementById('segmentBars').innerHTML=m.segments.slice(0,6).map(([name,count],i)=>{
+  const segsEl=document.getElementById('segmentBars');
+  segsEl.innerHTML=m.segments.slice(0,6).map(([name,count],i)=>{
     const pct=(count/m.segTotal*100).toFixed(1);
-    return`<div><div class="seg-hd"><span class="seg-nm">${name}</span><span style="color:${STC[i]}">${pct}%</span></div><div class="seg-bg"><div class="seg-fill" style="width:${pct}%;background:${SC[i]}"></div></div></div>`;
+    const isSelected=activeSegFilter===name;
+    const isDimmed=activeSegFilter&&activeSegFilter!==name;
+    const cls=isSelected?'seg-item cf-selected':isDimmed?'seg-item cf-dimmed':'seg-item';
+    const safeName=name.replace(/'/g,"\\'");
+    return`<div class="${cls}" onclick="toggleSegFilter('${safeName}')" title="Click to filter by ${name}">
+      <div class="seg-hd"><span class="seg-nm">${name}</span><span style="color:${STC[i]}">${pct}%</span></div>
+      <div class="seg-bg"><div class="seg-fill" style="width:${pct}%;background:${SC[i]}"></div></div>
+    </div>`;
   }).join('');
 }
 
-// ★ Monthly table now includes TAT Days column
 function renderMonthlyTable(m){
   const tbody=document.getElementById('monthlyTbody');
   let html=m.months.map(mo=>{
@@ -618,7 +857,7 @@ function renderMonthlyTable(m){
     const dt=parseFloat(delta)>=0?"+"+delta:delta;
     const tat=d.tatCount?Math.round(d.tatSum/d.tatCount):null;
     const tatCls=tat?tatClass(tat):'';
-    return`<tr class="drill-row" onclick="openDrill('month','${mo.replace(/'/g,"\\'")}',${d.leads.size})" title="Click — view ${d.leads.size} projects in ${mo}">
+    return`<tr class="drill-row" onclick="openDrill('month','${mo.replace(/'/g,"\\'")}',${d.leads.size})">
       <td class="clbl">${mo}<span class="drill-icon"> ↗</span></td>
       <td>${d.leads.size}</td><td>${iP}%</td><td>${bP}%</td><td class="${dc}">${dt}%</td>
       <td class="${tatCls}">${tat||"—"}</td></tr>`;
@@ -636,7 +875,6 @@ function renderMonthlyTable(m){
   tbody.innerHTML=html;
 }
 
-// ★ City table now includes TAT Days column
 function renderCityTable(m){
   const tbody=document.getElementById('cityTbody');
   let html=m.cities.map(city=>{
@@ -648,7 +886,7 @@ function renderCityTable(m){
     const dt=parseFloat(delta)>=0?"+"+delta:delta;
     const tat=d.tatCount?Math.round(d.tatSum/d.tatCount):null;
     const tatCls=tat?tatClass(tat):'';
-    return`<tr class="drill-row" onclick="openDrill('city','${city.replace(/'/g,"\\'")}',${d.leads.size})" title="Click — view ${d.leads.size} projects in ${city}">
+    return`<tr class="drill-row" onclick="openDrill('city','${city.replace(/'/g,"\\'")}',${d.leads.size})">
       <td class="clbl">${city}<span class="drill-icon"> ↗</span></td>
       <td>${d.leads.size}</td><td>${iP}%</td><td>${bP}%</td><td class="${dc}">${dt}%</td>
       <td class="${tatCls}">${tat||"—"}</td></tr>`;
@@ -696,66 +934,55 @@ function renderAnalytics(m){
 function renderHeader(m){
   const now=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   document.getElementById('lastUpdated').textContent="Updated "+now;
-  if(m.minDate&&m.maxDate){const fmt=d=>d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric'});document.getElementById('dateRangeBadge').textContent="📅 "+fmt(m.minDate)+" → "+fmt(m.maxDate);}
 }
 
-// ════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  DRILLTHROUGH
-// ════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 let dtRows=[],dtFiltered=[],dtPage=1;
 const DT_PS=25;
 let dtSortState={col:null,asc:true};
 
-// ★ type='all' added — opens all completed projects, ignores city/date filters
 function openDrill(type,value,count){
+  // Drillthrough uses current cross-filtered + header-filtered rows
   const base=getFiltered().filter(r=>isComplete(r));
-
-  if(type==='city')        dtRows=base.filter(r=>(r[CONFIG.COL_CITY]||"Unknown")===value);
-  else if(type==='month')  dtRows=base.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===value);
-  else if(type==='all'){
-    // All projects — ignore active filters, show everything completed
-    dtRows=allRows.filter(r=>isComplete(r));
-  }
+  if(type==='city')       dtRows=base.filter(r=>(r[CONFIG.COL_CITY]||"Unknown")===value);
+  else if(type==='month') dtRows=base.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===value);
+  else if(type==='all')   dtRows=allRows.filter(r=>isComplete(r));
   else dtRows=base;
 
-  // header
   document.getElementById('dtTitle').textContent=value;
   const typeLabel=type==='city'?'🏙️ City':type==='month'?'📅 Month':'📋 All';
   document.getElementById('dtSubtitle').textContent=`${typeLabel}: ${value} · ${dtRows.length} Projects`;
   document.getElementById('dtBadge').textContent=`📊 ${dtRows.length} Projects`;
 
-  // context pills
   const city=document.getElementById('cityDropdown').value;
   let pills=`<div class="dt-pill hl"><span>${type==='city'?'🏙️':type==='month'?'📅':'📋'}</span><span class="dt-pill-lbl">${type==='city'?'City':type==='month'?'Month':'View'}</span>&nbsp;<strong>${value}</strong></div>`;
   if(type!=='all'&&city!=="All")pills+=`<div class="dt-pill"><span>🏙️</span><span class="dt-pill-lbl">Filter</span>&nbsp;<strong>${city}</strong></div>`;
-  if(type==='all')pills+=`<div class="dt-pill"><span>ℹ️</span><span class="dt-pill-lbl">Scope</span>&nbsp;<strong>No Filters Applied</strong></div>`;
+  if(activeSizeFilter)pills+=`<div class="dt-pill"><span>📐</span><span class="dt-pill-lbl">Size</span>&nbsp;<strong>(${activeSizeFilter})</strong></div>`;
+  if(activeSegFilter)pills+=`<div class="dt-pill"><span>🏷️</span><span class="dt-pill-lbl">Segment</span>&nbsp;<strong>${activeSegFilter}</strong></div>`;
   pills+=`<div class="dt-pill"><span>✅</span><span class="dt-pill-lbl">Status</span>&nbsp;<strong>Installation Complete</strong></div>`;
   pills+=`<div class="dt-pill"><span>📁</span><span class="dt-pill-lbl">Projects</span>&nbsp;<strong>${dtRows.length}</strong></div>`;
   document.getElementById('dtContextBar').innerHTML=pills;
 
-  // mini KPIs
   const rev=dtRows.reduce((s,r)=>s+num(r[CONFIG.COL_REVENUE]),0);
   const iGM=dtRows.reduce((s,r)=>s+num(r[CONFIG.COL_INST_GM]),0);
   const bGM=dtRows.reduce((s,r)=>s+num(r[CONFIG.COL_BOOK_GM]),0);
-  const tats=dtRows.map(r=>num(r[CONFIG.COL_TAT])).filter(v=>v>0);
+  const tats=dtRows.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
   const avgT=tats.length?Math.round(tats.reduce((a,b)=>a+b,0)/tats.length):0;
   document.getElementById('dtKpiProj').textContent=dtRows.length;
   document.getElementById('dtKpiRev').textContent=fmtN(rev);
   document.getElementById('dtKpiIG').textContent=rev?(iGM/rev*100).toFixed(2)+"%":"—";
   document.getElementById('dtKpiBG').textContent=rev?(bGM/rev*100).toFixed(2)+"%":"—";
-  // ★ TAT KPI in drillthrough now color-coded
   const tatEl=document.getElementById('dtKpiTAT');
   tatEl.textContent=avgT||"—";
   tatEl.style.color=avgT>190?'#d32f2f':avgT>160?'#e65100':'#00897b';
 
-  // reset
   document.getElementById('dtSearch').value='';
   dtSortState={col:null,asc:true};
   document.querySelectorAll('.dt-tbl th').forEach(th=>{th.classList.remove('sorted');th.querySelector('.sa').textContent='↕';});
-  dtPage=1;
-  dtFiltered=[...dtRows];
+  dtPage=1;dtFiltered=[...dtRows];
   renderDtTable();
-
   document.getElementById('pageSummary').style.display='none';
   document.getElementById('pageDrillthrough').style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
@@ -782,16 +1009,16 @@ function dtSort(col){
   const C=CONFIG,asc=dtSortState.asc;
   dtFiltered.sort((a,b)=>{
     let va,vb;
-    if(col==='lead')  {va=(a[C.COL_LEAD]||"").toLowerCase();vb=(b[C.COL_LEAD]||"").toLowerCase();}
+    if(col==='lead')    {va=(a[C.COL_LEAD]||"").toLowerCase();vb=(b[C.COL_LEAD]||"").toLowerCase();}
     else if(col==='size')   {va=num(a[C.COL_SIZE]);vb=num(b[C.COL_SIZE]);}
     else if(col==='city')   {va=(a[C.COL_CITY]||"").toLowerCase();vb=(b[C.COL_CITY]||"").toLowerCase();}
     else if(col==='bracket'){va=(a[C.COL_SIZE_BRACKET]||"").toLowerCase();vb=(b[C.COL_SIZE_BRACKET]||"").toLowerCase();}
     else if(col==='igm')    {va=num(a[C.COL_INST_GM_PCT]);vb=num(b[C.COL_INST_GM_PCT]);}
     else if(col==='bgm')    {va=num(a[C.COL_BOOK_GM_PCT]);vb=num(b[C.COL_BOOK_GM_PCT]);}
     else if(col==='rev')    {va=num(a[C.COL_REVENUE]);vb=num(b[C.COL_REVENUE]);}
-    else if(col==='bdate')  {va=new Date(a[C.COL_BOOKING_DATE]||0);vb=new Date(b[C.COL_BOOKING_DATE]||0);}
-    else if(col==='idate')  {va=new Date(a[C.COL_INST_DATE]||a[C.COL_MONTH]||0);vb=new Date(b[C.COL_INST_DATE]||b[C.COL_MONTH]||0);}
-    else if(col==='tat')    {va=num(a[C.COL_TAT]);vb=num(b[C.COL_TAT]);}
+    else if(col==='bdate')  {va=parseDt(a[C.COL_BOOKING_DATE]||0)||0;vb=parseDt(b[C.COL_BOOKING_DATE]||0)||0;}
+    else if(col==='idate')  {va=parseDt(a[C.COL_INST_DATE]||a[C.COL_MONTH]||0)||0;vb=parseDt(b[C.COL_INST_DATE]||b[C.COL_MONTH]||0)||0;}
+    else if(col==='tat')    {va=calcTAT(a)||0;vb=calcTAT(b)||0;}
     else{va=0;vb=0;}
     if(va<vb)return asc?-1:1;if(va>vb)return asc?1:-1;return 0;
   });
@@ -805,15 +1032,12 @@ function renderDtTable(){
   const start=(dtPage-1)*DT_PS;
   const pRows=dtFiltered.slice(start,start+DT_PS);
   const tRev=dtFiltered.reduce((s,r)=>s+num(r[C.COL_REVENUE]),0);
-  const tIG=dtFiltered.reduce((s,r)=>s+num(r[C.COL_INST_GM]),0);
-  const tBG=dtFiltered.reduce((s,r)=>s+num(r[C.COL_BOOK_GM]),0);
-  const tatA=dtFiltered.map(r=>num(r[C.COL_TAT])).filter(v=>v>0);
+  const tatA=dtFiltered.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
   const avgTA=tatA.length?Math.round(tatA.reduce((a,b)=>a+b,0)/tatA.length):null;
-
   let html=pRows.map(r=>{
     const iP=num(r[C.COL_INST_GM_PCT]);
     const bP=num(r[C.COL_BOOK_GM_PCT]);
-    const tat=num(r[C.COL_TAT]);
+    const tat=calcTAT(r);
     const tc=tat>190?'#d32f2f':tat>160?'#f57c00':tat>0?'#00897b':'var(--dim)';
     const iDate=r[C.COL_INST_DATE]||r[C.COL_MONTH]||"";
     const bDate=r[C.COL_BOOKING_DATE]||r[C.COL_BOOKING_MONTH]||"";
@@ -827,19 +1051,11 @@ function renderDtTable(){
       <td>${fmtN(num(r[C.COL_REVENUE]))}</td>
       <td>${fmtD(bDate)}</td>
       <td>${fmtD(iDate)}</td>
-      <td style="color:${tc};font-weight:800;">${tat||"—"}</td>
+      <td style="color:${tc};font-weight:800;">${tat!==null?tat:"—"}</td>
     </tr>`;
   }).join('');
-
-  // totals row
-  html+=`<tr class="tr-tot">
-    <td colspan="6">TOTAL · ${dtFiltered.length} Projects</td>
-    <td>${fmtN(tRev)}</td><td>—</td><td>—</td>
-    <td>${avgTA||"—"}</td>
-  </tr>`;
+  html+=`<tr class="tr-tot"><td colspan="6">TOTAL · ${dtFiltered.length} Projects</td><td>${fmtN(tRev)}</td><td>—</td><td>—</td><td>${avgTA!==null?avgTA:"—"}</td></tr>`;
   document.getElementById('dtTbody').innerHTML=html;
-
-  // pagination
   document.getElementById('dtPageInfo').textContent=`Showing ${start+1}–${Math.min(start+DT_PS,total)} of ${total} projects`;
   let btns=`<button class="dt-pb" onclick="dtGo(${dtPage-1})" ${dtPage===1?'disabled':''}>‹ Prev</button>`;
   const sp=Math.max(1,dtPage-2),ep=Math.min(tp,sp+4);
@@ -847,13 +1063,15 @@ function renderDtTable(){
   btns+=`<button class="dt-pb" onclick="dtGo(${dtPage+1})" ${dtPage===tp?'disabled':''}>Next ›</button>`;
   document.getElementById('dtPageBtns').innerHTML=btns;
 }
-
 function dtGo(p){const tp=Math.max(1,Math.ceil(dtFiltered.length/DT_PS));dtPage=Math.max(1,Math.min(p,tp));renderDtTable();}
 
-// ── init ──
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
 async function initDashboard(){
+  activeSizeFilter=null;activeSegFilter=null;
   const ov=document.getElementById('loadingOverlay'),eb=document.getElementById('errorBanner');
-  ov.classList.remove('hidden');eb.style.display='none';
+  ov.classList.remove('ahidden');eb.style.display='none';
   try{
     allRows=await fetchSheetData();
     if(!allRows.length)throw new Error("No rows returned from sheet");
@@ -862,6 +1080,7 @@ async function initDashboard(){
     const m=compute(allRows);
     renderHeader(m);renderKPIs(m);renderBarChart(m);renderDonut(m);
     renderSegments(m);renderMonthlyTable(m);renderCityTable(m);renderAnalytics(m);
+    renderActiveFilterBar();
     ov.classList.add('hidden');
   }catch(err){
     console.error(err);ov.classList.add('hidden');eb.style.display='block';
