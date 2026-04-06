@@ -146,7 +146,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .card.cf-active{border-color:var(--sky2);box-shadow:0 0 0 2px rgba(41,182,246,.18),var(--sh2);}
 .ctitle{font-size:10.5px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:1.1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .ctitle::before{content:'';width:3.5px;height:15px;background:linear-gradient(180deg,var(--sky2),var(--navy));border-radius:3px;flex-shrink:0;}
-.ctitle-hint{font-size:9px;color:var(--sky);font-weight:700;text-transform:none;letter-spacing:0;margin-left:2px;}
+.ctitle-hint{font-size:9px;color:var(--sky);font-weight:700;text-transform:none;letter-spacing:0;margin-left:auto;}
 .rp{display:flex;flex-direction:column;gap:14px;}
 .chart-outer{position:relative;width:100%;height:280px;}
 .clegend{display:flex;align-items:center;gap:18px;margin-bottom:12px;}
@@ -456,7 +456,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
   <div class="rp">
     <div class="card" id="cardDonut">
-      <div class="ctitle">Size Wise GM <span class="ctitle-hint">% of Install GM ₹ · click to filter</span></div>
+      <div class="ctitle">Size Wise GM <span class="ctitle-hint">Avg Install GM% · click to filter</span></div>
       <div class="donut-wrap">
         <div class="donut-canvas" id="donutCanvasWrap">
           <canvas id="sizeDonut" width="120" height="120"></canvas>
@@ -482,7 +482,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       </div>
     </div>
     <div class="card" id="cardSegment">
-      <div class="ctitle">Segment Type <span class="ctitle-hint">% of Install GM ₹ · click to filter</span></div>
+      <div class="ctitle">Segment Type <span class="ctitle-hint">Avg Install GM% · click to filter</span></div>
       <div class="segs" id="segmentBars"></div>
     </div>
   </div>
@@ -522,7 +522,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 <div class="dt-context-bar" id="dtContextBar"></div>
 <div class="dt-kpi-row">
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div><div class="dt-kpi-lbl">Projects</div><div class="dt-kpi-val" id="dtKpiProj" style="color:#1a237e">—</div></div>
-  <div class="dt-kpi"><div class="dt-kpi-bar" style="background:lineargradient(90deg,#f57c00,#ffd54f)"></div><div class="dt-kpi-lbl">Total Revenue</div><div class="dt-kpi-val" id="dtKpiRev" style="color:#f57c00">—</div></div>
+  <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#f57c00,#ffd54f)"></div><div class="dt-kpi-lbl">Total Revenue</div><div class="dt-kpi-val" id="dtKpiRev" style="color:#f57c00">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div><div class="dt-kpi-lbl">Avg Install GM%</div><div class="dt-kpi-val" id="dtKpiIG" style="color:#00897b">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div><div class="dt-kpi-lbl">Avg Booking GM%</div><div class="dt-kpi-val" id="dtKpiBG" style="color:#7c4dff">—</div></div>
   <div class="dt-kpi"><div class="dt-kpi-bar" style="background:linear-gradient(90deg,#e65100,#ff8f00)"></div><div class="dt-kpi-lbl">Avg Days</div><div class="dt-kpi-val" id="dtKpiTAT" style="color:#e65100">—</div></div>
@@ -860,27 +860,35 @@ function compute(rows){
   });
   const cities=Object.keys(cityMap).sort((a,b)=>cityMap[b].leads.size-cityMap[a].leads.size);
 
-  let sA=0,sB=0,sC=0;
+  let sA_gm=0, sB_gm=0, sC_gm=0;
+  let sA_rev=0, sB_rev=0, sC_rev=0;
   done.forEach(r=>{
     const k=getSizeBracket(r);
     const gm=num(r[C.COL_INST_GM]);
-    if(k==='A')sA+=gm;
-    else if(k==='B')sB+=gm;
-    else if(k==='C')sC+=gm;
+    const rev=num(r[C.COL_REVENUE]);
+    if(k==='A') { sA_gm+=gm; sA_rev+=rev; }
+    else if(k==='B') { sB_gm+=gm; sB_rev+=rev; }
+    else if(k==='C') { sC_gm+=gm; sC_rev+=rev; }
   });
-  const sizeTotal = Math.abs(instGMSum) || 1; 
+  const pA = sA_rev ? (sA_gm / sA_rev) * 100 : 0;
+  const pB = sB_rev ? (sB_gm / sB_rev) * 100 : 0;
+  const pC = sC_rev ? (sC_gm / sC_rev) * 100 : 0;
 
   const segMap={};
   done.forEach(r=>{
     const s=r[C.COL_SEGMENT]||"Other";
-    segMap[s]=(segMap[s]||0)+num(r[C.COL_INST_GM]);
+    if (!segMap[s]) segMap[s] = { gm: 0, rev: 0 };
+    segMap[s].gm += num(r[C.COL_INST_GM]);
+    segMap[s].rev += num(r[C.COL_REVENUE]);
   });
-  const segTotal = Math.abs(instGMSum) || 1; 
-  const segments=Object.entries(segMap).sort((a,b)=>b[1]-a[1]);
+  const segments=Object.entries(segMap).map(([name, data]) => {
+    const gmPct = data.rev ? (data.gm / data.rev) * 100 : 0;
+    return [name, gmPct];
+  }).sort((a,b)=>b[1]-a[1]);
 
   const dates=done.map(r=>parseDt(r[C.COL_INST_DATE]||r[C.COL_MONTH]||r[C.COL_BOOKING_DATE]||r[C.COL_BOOKING_MONTH])).filter(d=>d&&!isNaN(d));
   return{totalProjects,instCompleted,revenue,instGMPct,bookGMPct,avgTAT,
-    months,monthMap,cities,cityMap,sizeA:sA,sizeB:sB,sizeC:sC,sizeTotal,segments,segTotal,
+    months,monthMap,cities,cityMap,pA,pB,pC,segments,
     minDate:dates.length?new Date(Math.min(...dates)):null,maxDate:dates.length?new Date(Math.max(...dates)):null,
     doneRows:done};
 }
@@ -937,9 +945,9 @@ function renderBarChart(m){
 }
 
 function renderDonut(m){
-  const pA=(m.sizeA/m.sizeTotal*100).toFixed(2);
-  const pB=(m.sizeB/m.sizeTotal*100).toFixed(2);
-  const pC=(m.sizeC/m.sizeTotal*100).toFixed(2);
+  const pA=m.pA.toFixed(2);
+  const pB=m.pB.toFixed(2);
+  const pC=m.pC.toFixed(2);
   document.getElementById('sizeA').textContent=pA+"%";
   document.getElementById('sizeB').textContent=pB+"%";
   document.getElementById('sizeC').textContent=pC+"%";
@@ -947,7 +955,7 @@ function renderDonut(m){
   if(donutI)donutI.destroy();
   donutI=new Chart(document.getElementById('sizeDonut'),{
     type:'doughnut',
-    data:{labels:['(A) 0-30','(B) 30-100','(C) >100'],datasets:[{data:[Math.max(0,pA),Math.max(0,pB),Math.max(0,pC)],backgroundColor:[`rgba(26,35,126,${alphas[0]})`,`rgba(41,182,246,${alphas[1]})`,`rgba(245,124,0,${alphas[2]})`],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},
+    data:{labels:['(A) 0-30','(B) 30-100','(C) >100'],datasets:[{data:[Math.max(0,m.pA),Math.max(0,m.pB),Math.max(0,m.pC)],backgroundColor:[`rgba(26,35,126,${alphas[0]})`,`rgba(41,182,246,${alphas[1]})`,`rgba(245,124,0,${alphas[2]})`],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},
     options:{cutout:'66%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#d8e2f8',borderWidth:1,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}}},
       onClick:(evt,elements)=>{if(!elements.length)return;const brackets=['A','B','C'];toggleSizeFilter(brackets[elements[0].index]);}
     }
@@ -964,15 +972,15 @@ const STC=['#1a237e','#039be5','#00897b','#7c4dff','#f57c00','#d32f2f'];
 
 function renderSegments(m){
   const segsEl=document.getElementById('segmentBars');
-  segsEl.innerHTML=m.segments.slice(0,6).map(([name,gmVal],i)=>{
-    const pct=(gmVal/m.segTotal*100).toFixed(1);
+  segsEl.innerHTML=m.segments.slice(0,6).map(([name,gmPct],i)=>{
+    const pctStr=gmPct.toFixed(2);
     const isSelected=activeSegFilter===name;
     const isDimmed=activeSegFilter&&activeSegFilter!==name;
     const cls=isSelected?'seg-item cf-selected':isDimmed?'seg-item cf-dimmed':'seg-item';
     const safeName=name.replace(/'/g,"\\'");
-    const fillWidth = Math.max(0, pct); 
+    const fillWidth = Math.min(100, Math.max(0, gmPct)); 
     return`<div class="${cls}" onclick="toggleSegFilter('${safeName}')" title="Click to filter by ${name}">
-      <div class="seg-hd"><span class="seg-nm">${name}</span><span style="color:${STC[i]}">${pct}%</span></div>
+      <div class="seg-hd"><span class="seg-nm">${name}</span><span style="color:${STC[i]}">${pctStr}%</span></div>
       <div class="seg-bg"><div class="seg-fill" style="width:${fillWidth}%;background:${SC[i]}"></div></div>
     </div>`;
   }).join('');
