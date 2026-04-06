@@ -344,7 +344,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 </div>
 <div id="errorBanner"></div>
 
-<!-- ══════════════════ PAGE 1 — SUMMARY ══════════════════ -->
 <div id="pageSummary">
 
 <div class="header">
@@ -434,7 +433,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
   <div class="rp">
     <div class="card" id="cardDonut">
-      <!-- ✅ FIX: label clarified to show GM ₹ share -->
       <div class="ctitle">Size Wise GM <span class="ctitle-hint">% of Install GM ₹ · click to filter</span></div>
       <div class="donut-wrap">
         <div class="donut-canvas" id="donutCanvasWrap">
@@ -461,7 +459,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       </div>
     </div>
     <div class="card" id="cardSegment">
-      <!-- ✅ FIX: label clarified to show GM ₹ share -->
       <div class="ctitle">Segment Type <span class="ctitle-hint">% of Install GM ₹ · click to filter</span></div>
       <div class="segs" id="segmentBars"></div>
     </div>
@@ -486,11 +483,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 </div>
 
 <div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; SSE-B2B INSTALLATION GM ANALYSIS &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
-</div><!-- /pageSummary -->
-
-
-<!-- ══════════════════ PAGE 2 — DRILLTHROUGH ══════════════════ -->
-<div id="pageDrillthrough">
+</div><div id="pageDrillthrough">
 <div class="dt-header">
   <button class="dt-back-btn" onclick="closeDrillthrough()">
     <span style="font-size:20px;line-height:1;">←</span> Back to Summary
@@ -542,11 +535,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
 </div>
 <div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; PROJECT WISE DRILLTHROUGH &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
-</div><!-- /pageDrillthrough -->
-
-
-<!-- ══════════════════ PAGE 3 — ANALYTICS DEEP DIVE ══════════════════ -->
-<div id="pageAnalytics">
+</div><div id="pageAnalytics">
 
 <div class="pg3-header">
   <button class="pg3-back" onclick="closeAnalyticsPage()">
@@ -554,44 +543,17 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </button>
   <div class="pg3-htxt">
     <div class="pg3-title">Analytics Deep Dive — <em>Page 3</em></div>
-    <div class="pg3-sub">Advanced GM · TAT · Scatter · Heatmap · Cohort Analysis</div>
+    <div class="pg3-sub">Advanced TAT · Scatter · Heatmap · Cohort Analysis</div>
   </div>
   <div class="pg3-tabs">
-    <button class="tab-btn active" id="tabBtnGm" onclick="showAnalyticsTab('gm',this)">GM Analysis</button>
-    <button class="tab-btn" id="tabBtnTat" onclick="showAnalyticsTab('tat',this)">TAT Analysis</button>
+    <button class="tab-btn active" id="tabBtnTat" onclick="showAnalyticsTab('tat',this)">TAT Analysis</button>
     <button class="tab-btn" id="tabBtnScatter" onclick="showAnalyticsTab('scatter',this)">Scatter Plot</button>
     <button class="tab-btn" id="tabBtnHeatmap" onclick="showAnalyticsTab('heatmap',this)">Heatmap</button>
     <button class="tab-btn" id="tabBtnCohort" onclick="showAnalyticsTab('cohort',this)">Cohort</button>
   </div>
 </div>
 
-<!-- TAB: GM Analysis -->
-<div id="a3-tab-gm" class="pg3-section visible">
-  <div class="kpi-strip" id="gmKpiStrip"></div>
-  <div class="grid2">
-    <div class="card">
-      <div class="ctitle">GM Waterfall — Revenue → Margin <span class="ctitle-hint">by cost layer</span></div>
-      <div id="waterfallContainer"></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">Install GM% Distribution <span class="ctitle-hint">frequency histogram</span></div>
-      <div class="ch-wrap"><canvas id="histChart"></canvas></div>
-    </div>
-  </div>
-  <div class="grid2">
-    <div class="card">
-      <div class="ctitle">Booking vs Install GM% by City <span class="ctitle-hint">divergence view</span></div>
-      <div id="cityGMDivHeight" style="position:relative;width:100%;height:300px;"><canvas id="cityDivChart"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">GM% Trend over Months <span class="ctitle-hint">dual-line</span></div>
-      <div class="ch-wrap"><canvas id="gmTrendChart"></canvas></div>
-    </div>
-  </div>
-</div>
-
-<!-- TAB: TAT Analysis -->
-<div id="a3-tab-tat" class="pg3-section">
+<div id="a3-tab-tat" class="pg3-section visible">
   <div class="kpi-strip" id="tatKpiStrip"></div>
   <div class="grid2">
     <div class="card">
@@ -612,7 +574,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
 </div>
 
-<!-- TAB: Scatter -->
 <div id="a3-tab-scatter" class="pg3-section">
   <div class="grid2">
     <div class="card">
@@ -632,7 +593,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
 </div>
 
-<!-- TAB: Heatmap -->
 <div id="a3-tab-heatmap" class="pg3-section">
   <div class="grid2">
     <div class="card">
@@ -652,7 +612,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
 </div>
 
-<!-- TAB: Cohort -->
 <div id="a3-tab-cohort" class="pg3-section">
   <div class="kpi-strip" id="cohortKpiStrip"></div>
   <div class="grid2">
@@ -679,10 +638,7 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 </div>
 
 <div class="footer" style="margin-top:14px;">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; ANALYTICS DEEP DIVE — PAGE 3 &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
-</div><!-- /pageAnalytics -->
-
-
-<script>
+</div><script>
 // ═══════════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════════
@@ -849,7 +805,7 @@ function updateDonutLegStyles(){
 }
 
 // ═══════════════════════════════════════════════
-//  COMPUTE  — ✅ FIXED: size & segment use GM ₹ sums
+//  COMPUTE
 // ═══════════════════════════════════════════════
 function compute(rows){
   const C=CONFIG,done=rows.filter(r=>isComplete(r));
@@ -881,7 +837,6 @@ function compute(rows){
   });
   const cities=Object.keys(cityMap).sort((a,b)=>cityMap[b].leads.size-cityMap[a].leads.size);
 
-  // ✅ FIX: Accumulate Installation GM ₹ per size bracket (was counting projects)
   let sA=0,sB=0,sC=0;
   done.forEach(r=>{
     const k=getSizeBracket(r);
@@ -890,15 +845,14 @@ function compute(rows){
     else if(k==='B')sB+=gm;
     else if(k==='C')sC+=gm;
   });
-  const sizeTotal=sA+sB+sC||1;
+  const sizeTotal = Math.abs(instGMSum) || 1; 
 
-  // ✅ FIX: Accumulate Installation GM ₹ per segment (was counting projects)
   const segMap={};
   done.forEach(r=>{
     const s=r[C.COL_SEGMENT]||"Other";
     segMap[s]=(segMap[s]||0)+num(r[C.COL_INST_GM]);
   });
-  const segTotal=Object.values(segMap).reduce((a,b)=>a+b,0)||1;
+  const segTotal = Math.abs(instGMSum) || 1; 
   const segments=Object.entries(segMap).sort((a,b)=>b[1]-a[1]);
 
   const dates=done.map(r=>parseDt(r[C.COL_INST_DATE]||r[C.COL_MONTH]||r[C.COL_BOOKING_DATE]||r[C.COL_BOOKING_MONTH])).filter(d=>d&&!isNaN(d));
@@ -959,7 +913,6 @@ function renderBarChart(m){
   });
 }
 
-// ✅ renderDonut — unchanged; percentages auto-correct once sizeA/B/C hold GM ₹ sums
 function renderDonut(m){
   const pA=(m.sizeA/m.sizeTotal*100).toFixed(2);
   const pB=(m.sizeB/m.sizeTotal*100).toFixed(2);
@@ -971,7 +924,7 @@ function renderDonut(m){
   if(donutI)donutI.destroy();
   donutI=new Chart(document.getElementById('sizeDonut'),{
     type:'doughnut',
-    data:{labels:['(A) 0-30','(B) 30-100','(C) >100'],datasets:[{data:[pA,pB,pC],backgroundColor:[`rgba(26,35,126,${alphas[0]})`,`rgba(41,182,246,${alphas[1]})`,`rgba(245,124,0,${alphas[2]})`],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},
+    data:{labels:['(A) 0-30','(B) 30-100','(C) >100'],datasets:[{data:[Math.max(0,pA),Math.max(0,pB),Math.max(0,pC)],backgroundColor:[`rgba(26,35,126,${alphas[0]})`,`rgba(41,182,246,${alphas[1]})`,`rgba(245,124,0,${alphas[2]})`],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},
     options:{cutout:'66%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#d8e2f8',borderWidth:1,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}%`}}},
       onClick:(evt,elements)=>{if(!elements.length)return;const brackets=['A','B','C'];toggleSizeFilter(brackets[elements[0].index]);}
     }
@@ -986,7 +939,6 @@ function renderDonut(m){
 const SC=['linear-gradient(90deg,#1a237e,#3949ab)','linear-gradient(90deg,#039be5,#81d4fa)','linear-gradient(90deg,#00897b,#4db6ac)','linear-gradient(90deg,#7c4dff,#b39ddb)','linear-gradient(90deg,#f57c00,#ffd54f)','linear-gradient(90deg,#d32f2f,#ef9a9a)'];
 const STC=['#1a237e','#039be5','#00897b','#7c4dff','#f57c00','#d32f2f'];
 
-// ✅ renderSegments — unchanged; percentages auto-correct once segMap holds GM ₹ sums
 function renderSegments(m){
   const segsEl=document.getElementById('segmentBars');
   segsEl.innerHTML=m.segments.slice(0,6).map(([name,gmVal],i)=>{
@@ -995,9 +947,10 @@ function renderSegments(m){
     const isDimmed=activeSegFilter&&activeSegFilter!==name;
     const cls=isSelected?'seg-item cf-selected':isDimmed?'seg-item cf-dimmed':'seg-item';
     const safeName=name.replace(/'/g,"\\'");
+    const fillWidth = Math.max(0, pct); 
     return`<div class="${cls}" onclick="toggleSegFilter('${safeName}')" title="Click to filter by ${name}">
       <div class="seg-hd"><span class="seg-nm">${name}</span><span style="color:${STC[i]}">${pct}%</span></div>
-      <div class="seg-bg"><div class="seg-fill" style="width:${pct}%;background:${SC[i]}"></div></div>
+      <div class="seg-bg"><div class="seg-fill" style="width:${fillWidth}%;background:${SC[i]}"></div></div>
     </div>`;
   }).join('');
 }
@@ -1097,7 +1050,7 @@ let dtSortState={col:null,asc:true};
 
 function openDrill(type,value,count){
   const base=getFiltered().filter(r=>isComplete(r));
-  if(type==='city')       dtRows=base.filter(r=>(r[CONFIG.COL_CITY]||"Unknown")===value);
+  if(type==='city')        dtRows=base.filter(r=>(r[CONFIG.COL_CITY]||"Unknown")===value);
   else if(type==='month') dtRows=base.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===value);
   else if(type==='all')   dtRows=allRows.filter(r=>isComplete(r));
   else dtRows=base;
@@ -1209,7 +1162,14 @@ function openAnalyticsPage(){
   document.getElementById('pageAnalytics').style.display='block';
   activeTATBucket=null;
   const filtered=getFiltered().filter(r=>isComplete(r));
-  buildA3GM(filtered);
+  
+  // Reset tabs so TAT Analysis is the default visible one
+  document.querySelectorAll('.pg3-section').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('a3-tab-tat').classList.add('visible');
+  document.getElementById('tabBtnTat').classList.add('active');
+  
+  buildA3TAT(filtered);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeAnalyticsPage(){
@@ -1223,7 +1183,7 @@ function showAnalyticsTab(id,btn){
   document.getElementById('a3-tab-'+id).classList.add('visible');
   btn.classList.add('active');
   const filtered=getFiltered().filter(r=>isComplete(r));
-  if(id==='gm')   buildA3GM(filtered);
+  
   if(id==='tat')  buildA3TAT(filtered);
   if(id==='scatter') buildA3Scatter(filtered);
   if(id==='heatmap') buildA3Heatmap(filtered);
@@ -1233,65 +1193,6 @@ function showAnalyticsTab(id,btn){
 // ═══════════════════════════════════════════════
 //  PAGE 3 — TAB BUILDERS
 // ═══════════════════════════════════════════════
-function buildA3GM(rows){
-  const totalRev=rows.reduce((s,r)=>s+num(r[CONFIG.COL_REVENUE]),0);
-  const totalInstGM=rows.reduce((s,r)=>s+num(r[CONFIG.COL_INST_GM]),0);
-  const totalBookGM=rows.reduce((s,r)=>s+num(r[CONFIG.COL_BOOK_GM]),0);
-  const avgInst=totalRev?totalInstGM/totalRev*100:0;
-  const avgBook=totalRev?totalBookGM/totalRev*100:0;
-  const delta=avgBook-avgInst;
-  const highGM=rows.filter(r=>num(r[CONFIG.COL_INST_GM_PCT])>=30).length;
-
-  document.getElementById('gmKpiStrip').innerHTML=`
-    <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div><div class="kpi-mini-lbl">Total Revenue</div><div class="kpi-mini-val" style="color:#1a237e">${fmtN(totalRev)}</div><div class="kpi-mini-sub">All completed</div></div>
-    <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#00897b,#4db6ac)"></div><div class="kpi-mini-lbl">Avg Install GM%</div><div class="kpi-mini-val" style="color:#00897b">${avgInst.toFixed(2)}%</div><div class="kpi-mini-sub">across ${rows.length} projects</div></div>
-    <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#7c4dff,#b39ddb)"></div><div class="kpi-mini-lbl">Avg Booking GM%</div><div class="kpi-mini-val" style="color:#7c4dff">${avgBook.toFixed(2)}%</div><div class="kpi-mini-sub">${delta>=0?'+':''}${delta.toFixed(2)}% vs install</div></div>
-    <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#039be5,#81d4fa)"></div><div class="kpi-mini-lbl">High GM Projects</div><div class="kpi-mini-val" style="color:#039be5">${highGM}</div><div class="kpi-mini-sub">≥30% install GM</div></div>
-  `;
-
-  const wfItems=[
-    {lbl:'Total Revenue',val:totalRev,pct:100,color:'#1a237e'},
-    {lbl:'Installation GM',val:totalInstGM,pct:avgInst,color:'#00897b'},
-    {lbl:'Booking GM',val:totalBookGM,pct:avgBook,color:'#7c4dff'},
-    {lbl:'GM Leakage (B-I)',val:Math.abs(totalBookGM-totalInstGM),pct:Math.abs(delta),color:delta>=0?'#d32f2f':'#039be5'},
-  ];
-  document.getElementById('waterfallContainer').innerHTML=wfItems.map(w=>`
-    <div class="wf-row">
-      <div class="wf-lbl">${w.lbl}</div>
-      <div class="wf-bar-wrap"><div class="wf-bar" style="width:${Math.max(5,w.val/totalRev*100).toFixed(1)}%;background:${w.color}">${w.pct.toFixed(1)}%</div></div>
-      <div class="wf-val" style="color:${w.color}">${fmtN(w.val)}</div>
-    </div>`).join('');
-
-  const allInstPcts=rows.map(r=>num(r[CONFIG.COL_INST_GM_PCT])).filter(v=>v>0);
-  const buckets=Array.from({length:10},(_, i)=>{const lo=10+i*3;return{lo,hi:lo+3,count:0};});
-  allInstPcts.forEach(v=>{const b=buckets.find(b=>v>=b.lo&&v<b.hi);if(b)b.count++;});
-  p3Chart('histChart',{type:'bar',data:{
-    labels:buckets.map(b=>`${b.lo}-${b.hi}%`),
-    datasets:[{data:buckets.map(b=>b.count),backgroundColor:buckets.map(b=>b.lo>=30?'#00897b':b.lo>=20?'#f57c00':'#d32f2f'),borderRadius:{topLeft:5,topRight:5},borderSkipped:false,barPercentage:.8}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700',size:9},maxRotation:40}},y:{grid:{color:'#edf0fb'},ticks:{font:{weight:'700',size:10}}}}}});
-
-  const cityNames=[...new Set(rows.map(r=>r[CONFIG.COL_CITY]||'Unknown'))];
-  const cityData=cityNames.map(c=>{
-    const cr=rows.filter(r=>(r[CONFIG.COL_CITY]||'Unknown')===c);
-    const rev=cr.reduce((s,r)=>s+num(r[CONFIG.COL_REVENUE]),0);
-    return{city:c,inst:rev?cr.reduce((s,r)=>s+num(r[CONFIG.COL_INST_GM]),0)/rev*100:0,book:rev?cr.reduce((s,r)=>s+num(r[CONFIG.COL_BOOK_GM]),0)/rev*100:0};
-  }).sort((a,b)=>b.inst-a.inst);
-  p3Chart('cityDivChart',{type:'bar',data:{
-    labels:cityData.map(c=>c.city),
-    datasets:[
-      {label:'Install GM%',data:cityData.map(c=>+c.inst.toFixed(2)),backgroundColor:'#1a237e',borderRadius:{topLeft:5,topRight:5},borderSkipped:false,barPercentage:.4,categoryPercentage:.85},
-      {label:'Booking GM%',data:cityData.map(c=>+c.book.toFixed(2)),backgroundColor:'#81d4fa',borderRadius:{topLeft:5,topRight:5},borderSkipped:false,barPercentage:.4,categoryPercentage:.85}
-    ]
-  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{color:'#edf0fb'},ticks:{callback:v=>v+'%',font:{weight:'700',size:10}},min:10},y:{grid:{display:false},ticks:{font:{weight:'800',size:11}}}}}});
-
-  const monthNames=[...new Set(rows.map(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])))].filter(m=>m!=='Unknown').sort((a,b)=>mKey(a)-mKey(b));
-  const iGMs=monthNames.map(m=>{const mr=rows.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===m);const rev=mr.reduce((s,r)=>s+num(r[CONFIG.COL_REVENUE]),0);return rev?+(mr.reduce((s,r)=>s+num(r[CONFIG.COL_INST_GM]),0)/rev*100).toFixed(2):null;});
-  const bGMs=monthNames.map(m=>{const mr=rows.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===m);const rev=mr.reduce((s,r)=>s+num(r[CONFIG.COL_REVENUE]),0);return rev?+(mr.reduce((s,r)=>s+num(r[CONFIG.COL_BOOK_GM]),0)/rev*100).toFixed(2):null;});
-  p3Chart('gmTrendChart',{type:'line',data:{labels:monthNames,datasets:[
-    {label:'Install GM%',data:iGMs,borderColor:'#1a237e',backgroundColor:'rgba(26,35,126,.08)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#1a237e',borderWidth:2.5},
-    {label:'Booking GM%',data:bGMs,borderColor:'#29b6f6',backgroundColor:'rgba(41,182,246,.07)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#29b6f6',borderWidth:2.5}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:30,font:{weight:'700',size:9}}},y:{grid:{color:'#edf0fb'},ticks:{callback:v=>v+'%',font:{weight:'700',size:10}},min:10,max:45}}}});
-}
 
 function buildA3TAT(rows){
   const tats=rows.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
