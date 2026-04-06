@@ -434,7 +434,8 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
   <div class="rp">
     <div class="card" id="cardDonut">
-      <div class="ctitle">Size Wise GM <span class="ctitle-hint">↗ click segment to filter</span></div>
+      <!-- ✅ FIX: label clarified to show GM ₹ share -->
+      <div class="ctitle">Size Wise GM <span class="ctitle-hint">% of Install GM ₹ · click to filter</span></div>
       <div class="donut-wrap">
         <div class="donut-canvas" id="donutCanvasWrap">
           <canvas id="sizeDonut" width="120" height="120"></canvas>
@@ -460,7 +461,8 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       </div>
     </div>
     <div class="card" id="cardSegment">
-      <div class="ctitle">Segment Type <span class="ctitle-hint">↗ click to filter</span></div>
+      <!-- ✅ FIX: label clarified to show GM ₹ share -->
+      <div class="ctitle">Segment Type <span class="ctitle-hint">% of Install GM ₹ · click to filter</span></div>
       <div class="segs" id="segmentBars"></div>
     </div>
   </div>
@@ -847,7 +849,7 @@ function updateDonutLegStyles(){
 }
 
 // ═══════════════════════════════════════════════
-//  COMPUTE
+//  COMPUTE  — ✅ FIXED: size & segment use GM ₹ sums
 // ═══════════════════════════════════════════════
 function compute(rows){
   const C=CONFIG,done=rows.filter(r=>isComplete(r));
@@ -878,12 +880,27 @@ function compute(rows){
     const t=calcTAT(r);if(t!==null&&t>0){cityMap[c].tatSum+=t;cityMap[c].tatCount++;}
   });
   const cities=Object.keys(cityMap).sort((a,b)=>cityMap[b].leads.size-cityMap[a].leads.size);
+
+  // ✅ FIX: Accumulate Installation GM ₹ per size bracket (was counting projects)
   let sA=0,sB=0,sC=0;
-  done.forEach(r=>{const k=getSizeBracket(r);if(k==='A')sA++;else if(k==='B')sB++;else if(k==='C')sC++;});
+  done.forEach(r=>{
+    const k=getSizeBracket(r);
+    const gm=num(r[C.COL_INST_GM]);
+    if(k==='A')sA+=gm;
+    else if(k==='B')sB+=gm;
+    else if(k==='C')sC+=gm;
+  });
   const sizeTotal=sA+sB+sC||1;
-  const segMap={};done.forEach(r=>{const s=r[C.COL_SEGMENT]||"Other";segMap[s]=(segMap[s]||0)+1;});
+
+  // ✅ FIX: Accumulate Installation GM ₹ per segment (was counting projects)
+  const segMap={};
+  done.forEach(r=>{
+    const s=r[C.COL_SEGMENT]||"Other";
+    segMap[s]=(segMap[s]||0)+num(r[C.COL_INST_GM]);
+  });
   const segTotal=Object.values(segMap).reduce((a,b)=>a+b,0)||1;
   const segments=Object.entries(segMap).sort((a,b)=>b[1]-a[1]);
+
   const dates=done.map(r=>parseDt(r[C.COL_INST_DATE]||r[C.COL_MONTH]||r[C.COL_BOOKING_DATE]||r[C.COL_BOOKING_MONTH])).filter(d=>d&&!isNaN(d));
   return{totalProjects,instCompleted,revenue,instGMPct,bookGMPct,avgTAT,
     months,monthMap,cities,cityMap,sizeA:sA,sizeB:sB,sizeC:sC,sizeTotal,segments,segTotal,
@@ -941,6 +958,8 @@ function renderBarChart(m){
         y:{grid:{color:'#edf0fb',lineWidth:1},border:{display:false,dash:[4,4]},ticks:{color:'#6675b0',callback:v=>v+'%',font:{weight:'700',size:10},stepSize:5},min:10,max:45}}}
   });
 }
+
+// ✅ renderDonut — unchanged; percentages auto-correct once sizeA/B/C hold GM ₹ sums
 function renderDonut(m){
   const pA=(m.sizeA/m.sizeTotal*100).toFixed(2);
   const pB=(m.sizeB/m.sizeTotal*100).toFixed(2);
@@ -963,12 +982,15 @@ function renderDonut(m){
   else{midVal.textContent='3';midLbl.textContent='SEGMENTS';}
   updateDonutLegStyles();
 }
+
 const SC=['linear-gradient(90deg,#1a237e,#3949ab)','linear-gradient(90deg,#039be5,#81d4fa)','linear-gradient(90deg,#00897b,#4db6ac)','linear-gradient(90deg,#7c4dff,#b39ddb)','linear-gradient(90deg,#f57c00,#ffd54f)','linear-gradient(90deg,#d32f2f,#ef9a9a)'];
 const STC=['#1a237e','#039be5','#00897b','#7c4dff','#f57c00','#d32f2f'];
+
+// ✅ renderSegments — unchanged; percentages auto-correct once segMap holds GM ₹ sums
 function renderSegments(m){
   const segsEl=document.getElementById('segmentBars');
-  segsEl.innerHTML=m.segments.slice(0,6).map(([name,count],i)=>{
-    const pct=(count/m.segTotal*100).toFixed(1);
+  segsEl.innerHTML=m.segments.slice(0,6).map(([name,gmVal],i)=>{
+    const pct=(gmVal/m.segTotal*100).toFixed(1);
     const isSelected=activeSegFilter===name;
     const isDimmed=activeSegFilter&&activeSegFilter!==name;
     const cls=isSelected?'seg-item cf-selected':isDimmed?'seg-item cf-dimmed':'seg-item';
@@ -1227,7 +1249,6 @@ function buildA3GM(rows){
     <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#039be5,#81d4fa)"></div><div class="kpi-mini-lbl">High GM Projects</div><div class="kpi-mini-val" style="color:#039be5">${highGM}</div><div class="kpi-mini-sub">≥30% install GM</div></div>
   `;
 
-  // Waterfall
   const wfItems=[
     {lbl:'Total Revenue',val:totalRev,pct:100,color:'#1a237e'},
     {lbl:'Installation GM',val:totalInstGM,pct:avgInst,color:'#00897b'},
@@ -1241,7 +1262,6 @@ function buildA3GM(rows){
       <div class="wf-val" style="color:${w.color}">${fmtN(w.val)}</div>
     </div>`).join('');
 
-  // Histogram
   const allInstPcts=rows.map(r=>num(r[CONFIG.COL_INST_GM_PCT])).filter(v=>v>0);
   const buckets=Array.from({length:10},(_, i)=>{const lo=10+i*3;return{lo,hi:lo+3,count:0};});
   allInstPcts.forEach(v=>{const b=buckets.find(b=>v>=b.lo&&v<b.hi);if(b)b.count++;});
@@ -1250,7 +1270,6 @@ function buildA3GM(rows){
     datasets:[{data:buckets.map(b=>b.count),backgroundColor:buckets.map(b=>b.lo>=30?'#00897b':b.lo>=20?'#f57c00':'#d32f2f'),borderRadius:{topLeft:5,topRight:5},borderSkipped:false,barPercentage:.8}]
   },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700',size:9},maxRotation:40}},y:{grid:{color:'#edf0fb'},ticks:{font:{weight:'700',size:10}}}}}});
 
-  // City divergence
   const cityNames=[...new Set(rows.map(r=>r[CONFIG.COL_CITY]||'Unknown'))];
   const cityData=cityNames.map(c=>{
     const cr=rows.filter(r=>(r[CONFIG.COL_CITY]||'Unknown')===c);
@@ -1265,7 +1284,6 @@ function buildA3GM(rows){
     ]
   },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{color:'#edf0fb'},ticks:{callback:v=>v+'%',font:{weight:'700',size:10}},min:10},y:{grid:{display:false},ticks:{font:{weight:'800',size:11}}}}}});
 
-  // GM Trend
   const monthNames=[...new Set(rows.map(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])))].filter(m=>m!=='Unknown').sort((a,b)=>mKey(a)-mKey(b));
   const iGMs=monthNames.map(m=>{const mr=rows.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===m);const rev=mr.reduce((s,r)=>s+num(r[CONFIG.COL_REVENUE]),0);return rev?+(mr.reduce((s,r)=>s+num(r[CONFIG.COL_INST_GM]),0)/rev*100).toFixed(2):null;});
   const bGMs=monthNames.map(m=>{const mr=rows.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===m);const rev=mr.reduce((s,r)=>s+num(r[CONFIG.COL_REVENUE]),0);return rev?+(mr.reduce((s,r)=>s+num(r[CONFIG.COL_BOOK_GM]),0)/rev*100).toFixed(2):null;});
@@ -1310,7 +1328,6 @@ function buildA3TAT(rows){
     ]
   },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{weight:'700',size:9},maxRotation:45}},y:{stacked:true,grid:{color:'#edf0fb'}}}}});
 
-  // TAT Trend
   const monthNames=[...new Set(rows.map(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])))].filter(m=>m!=='Unknown').sort((a,b)=>mKey(a)-mKey(b));
   const tatTrend=monthNames.map(m=>{const mr=rows.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===m);const mt=mr.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);return mt.length?Math.round(avgArr(mt)):null;});
   p3Chart('tatTrendChart',{type:'line',data:{labels:monthNames,datasets:[
@@ -1319,7 +1336,6 @@ function buildA3TAT(rows){
     {label:'190d',data:monthNames.map(()=>190),borderColor:'#d32f2f',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}
   ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:30,font:{weight:'700',size:9}}},y:{grid:{color:'#edf0fb'},ticks:{callback:v=>v+'d',font:{weight:'700',size:10}},min:50,max:260}}}});
 
-  // Box chart per city
   const cityNames=[...new Set(rows.map(r=>r[CONFIG.COL_CITY]||'Unknown'))];
   const cityStats=cityNames.map(c=>{
     const ct=rows.filter(r=>(r[CONFIG.COL_CITY]||'Unknown')===c).map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
@@ -1339,18 +1355,15 @@ function buildA3TAT(rows){
 
 function buildA3Scatter(rows){
   const C=CONFIG;
-  // Scatter 1: Size vs InstallGM
   const s1=rows.map(r=>({x:num(r[C.COL_SIZE]),y:num(r[C.COL_INST_GM_PCT]),r:Math.max(4,Math.sqrt(num(r[C.COL_REVENUE])/500000)*3),rev:num(r[C.COL_REVENUE]),city:r[C.COL_CITY]||'—'})).filter(d=>d.x>0&&d.y>0);
   p3Chart('scatter1',{type:'bubble',data:{datasets:[{data:s1,backgroundColor:'rgba(26,35,126,.35)',borderColor:'#1a237e',borderWidth:1,hoverBackgroundColor:'rgba(3,155,229,.6)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:d=>`${d.raw.city} · ${d.raw.x}kW · GM:${d.raw.y}% · Rev:${fmtN(d.raw.rev)}`}}},scales:{x:{grid:{color:'#edf0fb'},title:{display:true,text:'Size (kW)',font:{weight:'800'},color:'#6675b0'},ticks:{font:{weight:'700',size:10}}},y:{grid:{color:'#edf0fb'},title:{display:true,text:'Install GM%',font:{weight:'800'},color:'#6675b0'},ticks:{callback:v=>v+'%',font:{weight:'700',size:10}}}}}});
 
-  // Scatter 2: TAT vs InstallGM
   p3Chart('scatter2',{type:'scatter',data:{datasets:[
     {data:rows.filter(r=>calcTAT(r)<=160).map(r=>({x:calcTAT(r),y:num(r[C.COL_INST_GM_PCT])})).filter(d=>d.x>0&&d.y>0),backgroundColor:'rgba(0,137,123,.55)',label:'On Track'},
     {data:rows.filter(r=>{const t=calcTAT(r);return t>160&&t<=190;}).map(r=>({x:calcTAT(r),y:num(r[C.COL_INST_GM_PCT])})).filter(d=>d.x>0&&d.y>0),backgroundColor:'rgba(245,124,0,.65)',label:'Moderate'},
     {data:rows.filter(r=>calcTAT(r)>190).map(r=>({x:calcTAT(r),y:num(r[C.COL_INST_GM_PCT])})).filter(d=>d.x>0&&d.y>0),backgroundColor:'rgba(211,47,47,.65)',label:'Overdue'}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:d=>`TAT: ${d.raw.x}d · GM: ${d.raw.y}%`}}},scales:{x:{grid:{color:'#edf0fb'},title:{display:true,text:'TAT Days',font:{weight:'800'},color:'#6675b0'}},y:{grid:{color:'#edf0fb'},title:{display:true,text:'Install GM%',font:{weight:'800'},color:'#6675b0'},ticks:{callback:v=>v+'%'}}}}});
 
-  // Scatter 3: BookGM vs InstallGM
   const dMin=5,dMax=50;
   p3Chart('scatter3',{type:'scatter',data:{datasets:[
     {data:rows.map(r=>({x:num(r[C.COL_INST_GM_PCT]),y:num(r[C.COL_BOOK_GM_PCT]),city:r[C.COL_CITY]||'—'})).filter(d=>d.x>0&&d.y>0),backgroundColor:rows.map(r=>num(r[C.COL_BOOK_GM_PCT])>num(r[C.COL_INST_GM_PCT])?'rgba(211,47,47,.55)':'rgba(0,137,123,.55)').filter((_,i)=>num(rows[i][C.COL_INST_GM_PCT])>0),pointRadius:5},
@@ -1428,18 +1441,15 @@ function buildA3Cohort(rows){
     <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#1a237e,#3949ab)"></div><div class="kpi-mini-lbl">Active Months</div><div class="kpi-mini-val" style="color:#1a237e">${months.length}</div><div class="kpi-mini-sub">${months[0]||'—'} → ${months[months.length-1]||'—'}</div></div>
   `;
 
-  // Cohort lag
   const lagData=months.map(m=>{const mr=rows.filter(r=>normMonth(r[C.COL_MONTH]||r[C.COL_BOOKING_MONTH])===m);const ts=mr.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);return ts.length?Math.round(avgArr(ts)):null;});
   p3Chart('cohortLagChart',{type:'bar',data:{labels:months,datasets:[{label:'Avg TAT',data:lagData,backgroundColor:lagData.map(v=>!v?'#e3f2fd':v>190?'rgba(211,47,47,.7)':v>160?'rgba(245,124,0,.7)':'rgba(0,137,123,.7)'),borderRadius:{topLeft:6,topRight:6},borderSkipped:false,barPercentage:.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700',size:9},maxRotation:35}},y:{grid:{color:'#edf0fb'},ticks:{callback:v=>v+'d',font:{weight:'700',size:10}},min:0}}}});
 
-  // Pipeline
   const counts=months.map(m=>rows.filter(r=>normMonth(r[C.COL_MONTH]||r[C.COL_BOOKING_MONTH])===m).length);
   p3Chart('cohortPipeChart',{type:'bar',data:{labels:months,datasets:[
     {label:'Completed',data:counts,backgroundColor:'#1a237e',borderRadius:{topLeft:6,topRight:6},borderSkipped:false,barPercentage:.55},
     {label:'Avg GM%',data:gmArr.map(v=>+v.toFixed(2)),type:'line',borderColor:'#29b6f6',pointBackgroundColor:'#29b6f6',pointRadius:4,borderWidth:2,fill:false,yAxisID:'y2'}
   ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{weight:'700',size:9},maxRotation:35}},y:{grid:{color:'#edf0fb'},ticks:{stepSize:5,font:{weight:'700',size:10}}},y2:{position:'right',grid:{display:false},ticks:{callback:v=>v+'%',font:{weight:'700',size:10}},min:0,max:50}}}});
 
-  // Trend table
   let thtml='';
   months.forEach(m=>{
     const mr=rows.filter(r=>normMonth(r[C.COL_MONTH]||r[C.COL_BOOKING_MONTH])===m);
