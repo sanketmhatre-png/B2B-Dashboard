@@ -585,14 +585,14 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
       <div class="ch-wrap-sm"><canvas id="tatBucketChart"></canvas></div>
     </div>
     <div class="card">
-      <div class="ctitle">Avg TAT over Months <span class="ctitle-hint">vs 160 & 190 day thresholds</span></div>
-      <div class="ch-wrap"><canvas id="tatTrendChart"></canvas></div>
+      <div class="ctitle">MoM SLA Compliance Trend <span class="ctitle-hint">% of projects in each SLA zone</span></div>
+      <div class="ch-wrap"><canvas id="tatMomBucketChart"></canvas></div>
     </div>
   </div>
   <div class="grid-full">
     <div class="card">
-      <div class="ctitle">TAT Percentile Breakdown by City <span class="ctitle-hint">P25 · Median · P75 · Max</span></div>
-      <div id="tatBoxHeight" style="position:relative;width:100%;height:300px;"><canvas id="tatBoxChart"></canvas></div>
+      <div class="ctitle">Cumulative Completion S-Curve <span class="ctitle-hint">% of projects completed within X days</span></div>
+      <div class="ch-wrap-lg"><canvas id="tatCumulativeChart"></canvas></div>
     </div>
   </div>
 </div>
@@ -1240,6 +1240,7 @@ function buildA3TAT(rows){
     <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#d32f2f,#ef9a9a)"></div><div class="kpi-mini-lbl">Overdue (>190d)</div><div class="kpi-mini-val" style="color:#d32f2f">${overdue}</div><div class="kpi-mini-sub">${(overdue/tats.length*100).toFixed(1)}% of projects</div></div>
   `;
 
+  // 1. FIRST CHART - TAT Buckets
   const bucketDef=[{lo:0,hi:120,lbl:'<120d',color:'#00897b'},{lo:120,hi:160,lbl:'120–160d',color:'#039be5'},{lo:160,hi:190,lbl:'160–190d',color:'#f57c00'},{lo:190,hi:9999,lbl:'>190d',color:'#d32f2f'}];
   const buckCounts=bucketDef.map(b=>({...b,count:tats.filter(v=>v>=b.lo&&v<b.hi).length}));
   document.getElementById('tatBuckets').innerHTML=buckCounts.map((b,i)=>`
@@ -1252,6 +1253,7 @@ function buildA3TAT(rows){
   const selTats=activeTATBucket!==null?tats.filter(v=>v>=bucketDef[activeTATBucket].lo&&v<bucketDef[activeTATBucket].hi):tats;
   const histBuckets=Array.from({length:15},(_, i)=>{const lo=60+i*14;return{lo,hi:lo+14,all:0,sel:0};});
   tats.forEach(v=>{const b=histBuckets.find(b=>v>=b.lo&&v<b.hi);if(b){b.all++;if(selTats.includes(v))b.sel++;}});
+  
   p3Chart('tatBucketChart',{type:'bar',data:{
     labels:histBuckets.map(b=>`${b.lo}`),
     datasets:[
@@ -1260,29 +1262,82 @@ function buildA3TAT(rows){
     ]
   },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{weight:'700',size:9},maxRotation:45}},y:{stacked:true,grid:{color:'#edf0fb'}}}}});
 
+  // 2. NEW SECOND CHART - MoM SLA Compliance Trend (100% Stacked)
   const monthNames=[...new Set(rows.map(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])))].filter(m=>m!=='Unknown').sort((a,b)=>mKey(a)-mKey(b));
-  const tatTrend=monthNames.map(m=>{const mr=rows.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===m);const mt=mr.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);return mt.length?Math.round(avgArr(mt)):null;});
-  p3Chart('tatTrendChart',{type:'line',data:{labels:monthNames,datasets:[
-    {label:'Avg TAT',data:tatTrend,borderColor:'#039be5',backgroundColor:'rgba(3,155,229,.08)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#039be5',borderWidth:2.5},
-    {label:'160d',data:monthNames.map(()=>160),borderColor:'#f57c00',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false},
-    {label:'190d',data:monthNames.map(()=>190),borderColor:'#d32f2f',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxRotation:30,font:{weight:'700',size:9}}},y:{grid:{color:'#edf0fb'},ticks:{callback:v=>v+'d',font:{weight:'700',size:10}},min:50,max:260}}}});
+  const momBuckets=[
+    {label: '<120d', color: '#00897b', check: v => v < 120},
+    {label: '120-160d', color: '#039be5', check: v => v >= 120 && v < 160},
+    {label: '160-190d', color: '#f57c00', check: v => v >= 160 && v < 190},
+    {label: '>190d', color: '#d32f2f', check: v => v >= 190}
+  ];
 
-  const cityNames=[...new Set(rows.map(r=>r[CONFIG.COL_CITY]||'Unknown'))];
-  const cityStats=cityNames.map(c=>{
-    const ct=rows.filter(r=>(r[CONFIG.COL_CITY]||'Unknown')===c).map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
-    if(!ct.length)return null;
-    return{city:c,p25:percentile(ct,25),med:percentile(ct,50),p75:percentile(ct,75),max:Math.max(...ct),min:Math.min(...ct)};
-  }).filter(Boolean).sort((a,b)=>a.med-b.med);
-  document.getElementById('tatBoxHeight').style.height=Math.max(260,cityStats.length*52+80)+'px';
-  p3Chart('tatBoxChart',{type:'bar',data:{
-    labels:cityStats.map(c=>c.city),
-    datasets:[
-      {label:'P25–P75',data:cityStats.map(c=>[c.p25,c.p75]),backgroundColor:'rgba(3,155,229,.25)',borderColor:'#039be5',borderWidth:1.5,borderRadius:4,barPercentage:.55},
-      {label:'Min–P25',data:cityStats.map(c=>[c.min,c.p25]),backgroundColor:'rgba(41,182,246,.12)',borderWidth:0,barPercentage:.55},
-      {label:'P75–Max',data:cityStats.map(c=>[c.p75,c.max]),backgroundColor:'rgba(245,124,0,.18)',borderColor:'#f57c00',borderWidth:1,borderRadius:2,barPercentage:.55}
-    ]
-  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>{const s=['IQR P25–P75','Min–P25','P75–Max'][c.datasetIndex];return`${s}: ${c.raw[0]}–${c.raw[1]}d`;}}}},scales:{x:{grid:{color:'#edf0fb'},ticks:{callback:v=>v+'d',font:{weight:'700',size:10}},min:0},y:{grid:{display:false},ticks:{font:{weight:'800',size:11}}}}}});
+  const dsMom = momBuckets.map(b => {
+    const data = monthNames.map(m => {
+      const mRows = rows.filter(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])===m);
+      const mTats = mRows.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
+      if(!mTats.length) return 0;
+      const bCount = mTats.filter(b.check).length;
+      return +(bCount / mTats.length * 100).toFixed(1);
+    });
+    return {label: b.label, data: data, backgroundColor: b.color, stack: 'Stack 0', borderRadius:2};
+  });
+
+  p3Chart('tatMomBucketChart', {
+    type: 'bar',
+    data: {labels: monthNames, datasets: dsMom},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: true, position: 'bottom', labels: {boxWidth: 10, font: {family: "'Nunito',sans-serif", weight: 800, size: 10}}},
+        tooltip: {callbacks: {label: c => ` ${c.dataset.label}: ${c.raw}%`}}
+      },
+      scales: {
+        x: {stacked: true, grid: {display: false}, ticks: {font: {weight: '700', size: 9}, maxRotation: 35}},
+        y: {stacked: true, grid: {color: '#edf0fb'}, max: 100, ticks: {callback: v => v + '%', font: {weight: '700', size: 10}, stepSize: 25}}
+      }
+    }
+  });
+
+  // 3. NEW THIRD CHART - Cumulative Completion S-Curve
+  const dayIntervals = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 365];
+  const getCum = (subset) => {
+    const ts = subset.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
+    if(!ts.length) return dayIntervals.map(()=>0);
+    return dayIntervals.map(day => {
+      const done = ts.filter(v => v <= day).length;
+      return +(done / ts.length * 100).toFixed(1);
+    });
+  };
+
+  const cumAll = getCum(rows);
+  const cumA = getCum(rows.filter(r => getSizeBracket(r)==='A'));
+  const cumB = getCum(rows.filter(r => getSizeBracket(r)==='B'));
+  const cumC = getCum(rows.filter(r => getSizeBracket(r)==='C'));
+
+  p3Chart('tatCumulativeChart', {
+    type: 'line',
+    data: {
+      labels: dayIntervals.map(d => d + ' Days'),
+      datasets: [
+        {label: 'All Projects', data: cumAll, borderColor: '#1a237e', backgroundColor: '#1a237e', borderWidth: 3.5, pointRadius: 4, tension: 0.35},
+        {label: 'Size A (0-30kW)', data: cumA, borderColor: '#29b6f6', backgroundColor: '#29b6f6', borderDash: [5,5], borderWidth: 2, pointRadius: 3, tension: 0.35},
+        {label: 'Size B (30-100kW)', data: cumB, borderColor: '#039be5', backgroundColor: '#039be5', borderDash: [5,5], borderWidth: 2, pointRadius: 3, tension: 0.35},
+        {label: 'Size C (>100kW)', data: cumC, borderColor: '#f57c00', backgroundColor: '#f57c00', borderDash: [5,5], borderWidth: 2, pointRadius: 3, tension: 0.35}
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: {mode: 'index', intersect: false},
+      plugins: {
+        legend: {display: true, position: 'bottom', labels: {boxWidth: 12, usePointStyle: true, font: {family: "'Nunito',sans-serif", weight: 800, size: 10}}},
+        tooltip: {backgroundColor:'#fff', titleColor:'#1a237e', bodyColor:'#3949ab', borderColor:'#d8e2f8', borderWidth:1, padding:10, callbacks: {label: c => ` ${c.dataset.label}: ${c.raw}% completed`}}
+      },
+      scales: {
+        x: {grid: {display: false}, ticks: {font: {weight: '700', size: 10}}},
+        y: {grid: {color: '#edf0fb'}, max: 100, min: 0, ticks: {callback: v => v + '%', font: {weight: '700', size: 10}, stepSize: 20}}
+      }
+    }
+  });
 }
 
 function buildA3Scatter(rows){
@@ -1424,6 +1479,15 @@ async function initDashboard(){
   try{
     allRows=await fetchSheetData();
     if(!allRows.length)throw new Error("No rows returned from sheet");
+    
+    // --- NEW LOGIC: Safely multiply absolute financial values by 1000 without breaking sizes or % ---
+    allRows.forEach(r => {
+      if(r[CONFIG.COL_REVENUE]) r[CONFIG.COL_REVENUE] = String(num(r[CONFIG.COL_REVENUE]) * 1000);
+      if(r[CONFIG.COL_INST_GM]) r[CONFIG.COL_INST_GM] = String(num(r[CONFIG.COL_INST_GM]) * 1000);
+      if(r[CONFIG.COL_BOOK_GM]) r[CONFIG.COL_BOOK_GM] = String(num(r[CONFIG.COL_BOOK_GM]) * 1000);
+      if(r[CONFIG.COL_DESIGN_GM]) r[CONFIG.COL_DESIGN_GM] = String(num(r[CONFIG.COL_DESIGN_GM]) * 1000);
+    });
+
     populateCities([...new Set(allRows.map(r=>r[CONFIG.COL_CITY]).filter(Boolean))].sort());
     populateDates(allRows);
     const m=compute(allRows);
