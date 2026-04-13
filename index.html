@@ -542,12 +542,12 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
         <th onclick="dtSort('size')"    id="th-size">Size (kW) <span class="sa">↕</span></th>
         <th onclick="dtSort('city')"    id="th-city">City <span class="sa">↕</span></th>
         <th onclick="dtSort('bracket')" id="th-bracket">Size Bracket <span class="sa">↕</span></th>
-        <th onclick="dtSort('igm')"     id="th-igm">Install GM% <span class="sa">↕</span></th>
-        <th onclick="dtSort('bgm')"     id="th-bgm">Booking GM% <span class="sa">↕</span></th>
-        <th onclick="dtSort('rev')"     id="th-rev">Revenue <span class="sa">↕</span></th>
+        <th onclick="dtSort('igm')"      id="th-igm">Install GM% <span class="sa">↕</span></th>
+        <th onclick="dtSort('bgm')"      id="th-bgm">Booking GM% <span class="sa">↕</span></th>
+        <th onclick="dtSort('rev')"      id="th-rev">Revenue <span class="sa">↕</span></th>
         <th onclick="dtSort('bdate')"   id="th-bdate">Booking Date <span class="sa">↕</span></th>
         <th onclick="dtSort('idate')"   id="th-idate">Installed Date <span class="sa">↕</span></th>
-        <th onclick="dtSort('tat')"     id="th-tat">Days <span class="sa">↕</span></th>
+        <th onclick="dtSort('tat')"      id="th-tat">Days <span class="sa">↕</span></th>
       </tr></thead>
       <tbody id="dtTbody"></tbody>
     </table>
@@ -790,12 +790,24 @@ function populateCities(cities){
   s.innerHTML='<option value="All">All Cities</option>';
   cities.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o);});
 }
-function populateDates(rows){
-  const dates=rows.map(r=>parseDt(r[CONFIG.COL_INST_DATE]||r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_DATE]||r[CONFIG.COL_BOOKING_MONTH])).filter(Boolean);
-  if(!dates.length)return;
-  const fmt=d=>d.toISOString().split('T')[0];
-  document.getElementById('dateFrom').value=fmt(new Date(Math.min(...dates)));
-  document.getElementById('dateTo').value=fmt(new Date(Math.max(...dates)));
+function populateDates(rows) {
+  const now = new Date();
+  const dates = rows.map(r => parseDt(r[CONFIG.COL_INST_DATE] || r[CONFIG.COL_MONTH] || r[CONFIG.COL_BOOKING_DATE] || r[CONFIG.COL_BOOKING_MONTH]))
+    .filter(d => d && !isNaN(d) && d.getFullYear() < 2100); // Filter out years like 2299
+
+  if (!dates.length) return;
+
+  const fmt = d => d.toISOString().split('T')[0];
+  const minDate = new Date(Math.min(...dates));
+  const maxDataDate = new Date(Math.max(...dates));
+  const finalToDate = maxDataDate > now ? now : maxDataDate;
+
+  document.getElementById('dateFrom').value = fmt(minDate);
+  document.getElementById('dateTo').value = fmt(finalToDate);
+  
+  // Prevent picking future dates in the calendar picker
+  document.getElementById('dateTo').setAttribute('max', fmt(now));
+  document.getElementById('dateFrom').setAttribute('max', fmt(now));
 }
 
 // ═══ CROSS-FILTER TOGGLES ═══
@@ -1108,7 +1120,7 @@ function openDrill(type,value,count){
   document.getElementById('dtKpiBG').textContent=rev?(bGM/rev*100).toFixed(2)+"%":"—";
   const tatEl=document.getElementById('dtKpiTAT');
   tatEl.textContent=avgT||"—";
-  tatEl.style.color=avgT>190?'#d32f2f':avgT>160?'#e65100':'#00897b';
+  tatEl.style.color=avgT>190?'#d32f2f':avgT>160?'#f57c00':'#00897b';
   document.getElementById('dtSearch').value='';
   dtSortState={col:null,asc:true};
   document.querySelectorAll('.dt-tbl th').forEach(th=>{th.classList.remove('sorted');th.querySelector('.sa').textContent='↕';});
@@ -1480,12 +1492,12 @@ async function initDashboard(){
     allRows=await fetchSheetData();
     if(!allRows.length)throw new Error("No rows returned from sheet");
     
-    // --- NEW LOGIC: Safely multiply absolute financial values by 1000 without breaking sizes or % ---
+    // FIXED MULTIPLIER: Increased to 100,000 to correct 1.32 Cr to 132 Cr
     allRows.forEach(r => {
-      if(r[CONFIG.COL_REVENUE]) r[CONFIG.COL_REVENUE] = String(num(r[CONFIG.COL_REVENUE]) * 1000);
-      if(r[CONFIG.COL_INST_GM]) r[CONFIG.COL_INST_GM] = String(num(r[CONFIG.COL_INST_GM]) * 1000);
-      if(r[CONFIG.COL_BOOK_GM]) r[CONFIG.COL_BOOK_GM] = String(num(r[CONFIG.COL_BOOK_GM]) * 1000);
-      if(r[CONFIG.COL_DESIGN_GM]) r[CONFIG.COL_DESIGN_GM] = String(num(r[CONFIG.COL_DESIGN_GM]) * 1000);
+      if(r[CONFIG.COL_REVENUE]) r[CONFIG.COL_REVENUE] = String(num(r[CONFIG.COL_REVENUE]) * 100000);
+      if(r[CONFIG.COL_INST_GM]) r[CONFIG.COL_INST_GM] = String(num(r[CONFIG.COL_INST_GM]) * 100000);
+      if(r[CONFIG.COL_BOOK_GM]) r[CONFIG.COL_BOOK_GM] = String(num(r[CONFIG.COL_BOOK_GM]) * 100000);
+      if(r[CONFIG.COL_DESIGN_GM]) r[CONFIG.COL_DESIGN_GM] = String(num(r[CONFIG.COL_DESIGN_GM]) * 100000);
     });
 
     populateCities([...new Set(allRows.map(r=>r[CONFIG.COL_CITY]).filter(Boolean))].sort());
