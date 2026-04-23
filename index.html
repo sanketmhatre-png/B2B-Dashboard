@@ -22,6 +22,7 @@
 body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padding:18px 22px 30px;min-height:100vh;}
 #pageDrillthrough{display:none;}
 #pageAnalytics{display:none;}
+#pageDeviations{display:none;}
 
 /* ─── LOADING ─── */
 #loadingOverlay{position:fixed;inset:0;background:rgba(238,242,251,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px;transition:opacity .4s;}
@@ -357,6 +358,25 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 .kpi:nth-child(1){animation-delay:.04s}.kpi:nth-child(2){animation-delay:.08s}
 .kpi:nth-child(3){animation-delay:.12s}.kpi:nth-child(4){animation-delay:.16s}
 .kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.24s}
+
+/* ════ PAGE 4 — DEVIATIONS ════ */
+.dev-controls {
+  background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 14px; box-shadow: var(--sh1); border: 1.5px solid var(--border);
+}
+.dev-controls select {
+  padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border2); font-family: 'Nunito', sans-serif;
+  font-weight: 700; color: var(--navy); outline: none; min-width: 250px; cursor: pointer;
+}
+.dev-table-wrap { display: flex; justify-content: center; margin-top: 20px; }
+.dev-tbl { border-collapse: collapse; border: 1px solid var(--border); min-width: 500px; box-shadow: var(--sh1); }
+.dev-tbl th { background: #1a237e; color: #fff; padding: 10px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2); }
+.dev-tbl td { padding: 10px 14px; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 11.5px; text-align: right; color: var(--navy); }
+.dev-tbl td:first-child { text-align: left; font-family: 'Nunito', sans-serif; font-weight: 800; background: var(--bg); }
+.waterfall-legend { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; font-size: 10px; font-weight: 800; color: var(--muted); }
+.wl-item { display: flex; align-items: center; gap: 5px; }
+.wl-box { width: 12px; height: 12px; border-radius: 2px; }
+
 </style>
 </head>
 <body>
@@ -368,7 +388,6 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 <div id="errorBanner"></div>
 
 <div id="pageSummary">
-
 <div class="header">
   <div class="header-logo-block">
     <div class="logo-svg-wrap">
@@ -424,6 +443,9 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
           <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
         </svg>
         Analytics
+      </button>
+      <button class="analytics-btn" style="background:linear-gradient(135deg,#00897b,#4db6ac);" onclick="openDeviationsPage()">
+        📊 Deviations
       </button>
       <button class="refresh-btn" onclick="initDashboard()">↻ Refresh</button>
     </div>
@@ -506,7 +528,9 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 </div>
 
 <div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; SSE-B2B INSTALLATION GM ANALYSIS &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
-</div><div id="pageDrillthrough">
+</div>
+
+<div id="pageDrillthrough">
 <div class="dt-header">
   <button class="dt-back-btn" onclick="closeDrillthrough()">
     <span style="font-size:20px;line-height:1;">←</span> Back to Summary
@@ -558,8 +582,9 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
   </div>
 </div>
 <div class="footer">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; PROJECT WISE DRILLTHROUGH &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
-</div><div id="pageAnalytics">
+</div>
 
+<div id="pageAnalytics">
 <div class="pg3-header">
   <button class="pg3-back" onclick="closeAnalyticsPage()">
     <span style="font-size:20px;line-height:1;">←</span> Back to Summary
@@ -661,7 +686,50 @@ body{background:var(--bg);color:var(--navy);font-family:'Nunito',sans-serif;padd
 </div>
 
 <div class="footer" style="margin-top:14px;">☀️ SOLAR SQUARE ENERGY &nbsp;|&nbsp; ANALYTICS DEEP DIVE — PAGE 3 &nbsp;|&nbsp; LIVE DATA &nbsp;|&nbsp; CONFIDENTIAL</div>
-</div><script>
+</div>
+
+<div id="pageDeviations">
+  <div class="pg3-header">
+    <button class="pg3-back" onclick="closeDeviationsPage()">
+      <span style="font-size:20px;line-height:1;">←</span> Back to Summary
+    </button>
+    <div class="pg3-htxt">
+      <div class="pg3-title">Revenue Type Deviations — <em>S C&I</em></div>
+      <div class="pg3-sub">Design vs Installation Waterfall Analysis</div>
+    </div>
+  </div>
+
+  <div class="dev-controls">
+    <span style="font-weight: 800; color: var(--navy); font-size: 13px;">Select Project:</span>
+    <select id="devProjectSelect" onchange="updateDeviations()">
+      <option value="ALL">Overall (All Projects)</option>
+    </select>
+  </div>
+
+  <div class="card" style="margin-bottom: 20px;">
+    <div class="ctitle" style="justify-content: center; font-size: 14px;">Small C&I Design - Installation deviation trend</div>
+    <div class="waterfall-legend">
+      <div class="wl-item"><div class="wl-box" style="background:#00897b"></div>Positive</div>
+      <div class="wl-item"><div class="wl-box" style="background:#d32f2f"></div>Negative</div>
+      <div class="wl-item"><div class="wl-box" style="background:#1a237e"></div>Subtotal</div>
+    </div>
+    <div class="ch-wrap-lg"><canvas id="waterfallChart"></canvas></div>
+    
+    <div class="dev-table-wrap">
+      <table class="dev-tbl">
+        <thead>
+          <tr>
+            <th>Particulars</th><th>Booking</th><th>Design</th><th>Install</th>
+          </tr>
+        </thead>
+        <tbody id="devTbody">
+          </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
 // ═══════════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════════
@@ -674,7 +742,16 @@ const CONFIG={
   COL_BOOKING_DATE:"Booking Date",COL_INST_DATE:"Installed Date",
   COL_SIZE_BRACKET:"Size Bracket",
   COL_INST_GM_PCT:"Installation GM %",COL_BOOK_GM_PCT:"Booking GM %",
-  DONE_STATUS:"Installation Complete"
+  DONE_STATUS:"Installation Complete",
+  
+  // ⚠️ IMPORTANT: UPDATE THESE STRINGS TO MATCH YOUR SPREADSHEET EXACTLY ⚠️
+  COL_DEV_MODULE: "Module Deviation",     
+  COL_DEV_INVERTER: "Inverter Deviation", 
+  COL_DEV_MMS: "MMS Deviation",           
+  COL_DEV_CABLING: "Cabling Deviation",   
+  COL_DEV_INFRA: "Infra BOS Deviation",   
+  COL_DEV_OTHER_BOS: "Other BOS Deviation",
+  COL_DEV_OTHERS: "Others Deviation"      
 };
 
 Chart.defaults.font.family="'Nunito',sans-serif";
@@ -793,7 +870,7 @@ function populateCities(cities){
 function populateDates(rows) {
   const now = new Date();
   const dates = rows.map(r => parseDt(r[CONFIG.COL_INST_DATE] || r[CONFIG.COL_MONTH] || r[CONFIG.COL_BOOKING_DATE] || r[CONFIG.COL_BOOKING_MONTH]))
-    .filter(d => d && !isNaN(d) && d.getFullYear() < 2100); // Filter out years like 2299
+    .filter(d => d && !isNaN(d) && d.getFullYear() < 2100); 
 
   if (!dates.length) return;
 
@@ -805,7 +882,6 @@ function populateDates(rows) {
   document.getElementById('dateFrom').value = fmt(minDate);
   document.getElementById('dateTo').value = fmt(finalToDate);
   
-  // Prevent picking future dates in the calendar picker
   document.getElementById('dateTo').setAttribute('max', fmt(now));
   document.getElementById('dateFrom').setAttribute('max', fmt(now));
 }
@@ -1202,11 +1278,11 @@ function dtGo(p){const tp=Math.max(1,Math.ceil(dtFiltered.length/DT_PS));dtPage=
 // ═══════════════════════════════════════════════
 function openAnalyticsPage(){
   document.getElementById('pageSummary').style.display='none';
+  document.getElementById('pageDeviations').style.display='none';
   document.getElementById('pageAnalytics').style.display='block';
   activeTATBucket=null;
   const filtered=getFiltered().filter(r=>isComplete(r));
   
-  // Reset tabs so TAT Analysis is the default visible one
   document.querySelectorAll('.pg3-section').forEach(s=>s.classList.remove('visible'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('a3-tab-tat').classList.add('visible');
@@ -1252,7 +1328,6 @@ function buildA3TAT(rows){
     <div class="kpi-mini"><div class="kpi-mini-bar" style="background:linear-gradient(90deg,#d32f2f,#ef9a9a)"></div><div class="kpi-mini-lbl">Overdue (>190d)</div><div class="kpi-mini-val" style="color:#d32f2f">${overdue}</div><div class="kpi-mini-sub">${(overdue/tats.length*100).toFixed(1)}% of projects</div></div>
   `;
 
-  // 1. FIRST CHART - TAT Buckets
   const bucketDef=[{lo:0,hi:120,lbl:'<120d',color:'#00897b'},{lo:120,hi:160,lbl:'120–160d',color:'#039be5'},{lo:160,hi:190,lbl:'160–190d',color:'#f57c00'},{lo:190,hi:9999,lbl:'>190d',color:'#d32f2f'}];
   const buckCounts=bucketDef.map(b=>({...b,count:tats.filter(v=>v>=b.lo&&v<b.hi).length}));
   document.getElementById('tatBuckets').innerHTML=buckCounts.map((b,i)=>`
@@ -1274,7 +1349,6 @@ function buildA3TAT(rows){
     ]
   },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{weight:'700',size:9},maxRotation:45}},y:{stacked:true,grid:{color:'#edf0fb'}}}}});
 
-  // 2. NEW SECOND CHART - MoM SLA Compliance Trend (100% Stacked)
   const monthNames=[...new Set(rows.map(r=>normMonth(r[CONFIG.COL_MONTH]||r[CONFIG.COL_BOOKING_MONTH])))].filter(m=>m!=='Unknown').sort((a,b)=>mKey(a)-mKey(b));
   const momBuckets=[
     {label: '<120d', color: '#00897b', check: v => v < 120},
@@ -1310,7 +1384,6 @@ function buildA3TAT(rows){
     }
   });
 
-  // 3. NEW THIRD CHART - Cumulative Completion S-Curve
   const dayIntervals = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 365];
   const getCum = (subset) => {
     const ts = subset.map(r=>calcTAT(r)).filter(v=>v!==null&&v>0);
@@ -1482,6 +1555,152 @@ function buildA3Cohort(rows){
 }
 
 // ═══════════════════════════════════════════════
+//  PAGE 4 DEVIATIONS — WATERFALL
+// ═══════════════════════════════════════════════
+let waterfallChartInstance = null;
+
+function openDeviationsPage() {
+  document.getElementById('pageSummary').style.display = 'none';
+  document.getElementById('pageAnalytics').style.display = 'none';
+  document.getElementById('pageDrillthrough').style.display = 'none';
+  document.getElementById('pageDeviations').style.display = 'block';
+  
+  const baseRows = getFiltered().filter(r => isComplete(r));
+  const projects = [...new Set(baseRows.map(r => r[CONFIG.COL_LEAD]))].sort();
+  const select = document.getElementById('devProjectSelect');
+  select.innerHTML = '<option value="ALL">Overall (All Projects)</option>';
+  projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    select.appendChild(opt);
+  });
+  
+  updateDeviations();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function closeDeviationsPage() {
+  document.getElementById('pageDeviations').style.display = 'none';
+  document.getElementById('pageSummary').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateDeviations() {
+  const selected = document.getElementById('devProjectSelect').value;
+  let rows = getFiltered().filter(r => isComplete(r));
+  if (selected !== "ALL") {
+    rows = rows.filter(r => r[CONFIG.COL_LEAD] === selected);
+  }
+
+  const C = CONFIG;
+  const orders = rows.length;
+  const cap = rows.reduce((s, r) => s + num(r[C.COL_SIZE]), 0);
+  const rev = rows.reduce((s, r) => s + num(r[C.COL_REVENUE]), 0);
+  
+  const bGM_Val = rows.reduce((s, r) => s + num(r[C.COL_BOOK_GM]), 0);
+  const dGM_Val = rows.reduce((s, r) => s + num(r[C.COL_DESIGN_GM]), 0);
+  const iGM_Val = rows.reduce((s, r) => s + num(r[C.COL_INST_GM]), 0);
+  
+  const bGM_Pct = rev ? (bGM_Val / rev) * 100 : 0;
+  const dGM_Pct = rev ? (dGM_Val / rev) * 100 : 0;
+  const iGM_Pct = rev ? (iGM_Val / rev) * 100 : 0;
+
+  const getDevPct = (col) => {
+    const val = rows.reduce((s, r) => s + num(r[col]), 0);
+    return rev ? (val / rev) * 100 : 0;
+  };
+
+  const dev_Mod = getDevPct(C.COL_DEV_MODULE);
+  const dev_Inv = getDevPct(C.COL_DEV_INVERTER);
+  const dev_MMS = getDevPct(C.COL_DEV_MMS);
+  const dev_Cab = getDevPct(C.COL_DEV_CABLING);
+  const dev_Inf = getDevPct(C.COL_DEV_INFRA);
+  const dev_OthB = getDevPct(C.COL_DEV_OTHER_BOS);
+  const dev_Oth = getDevPct(C.COL_DEV_OTHERS);
+
+  let current = bGM_Pct;
+  const steps = [
+    [0, current],
+    [current, current += dev_Mod],
+    [current, current += dev_Inv],
+    [current, current += dev_MMS],
+    [current, current += dev_Cab],
+    [current, current += dev_Inf],
+    [current, current += dev_OthB],
+    [current, current += dev_Oth],
+    [0, iGM_Pct]
+  ];
+
+  const labels = ['Booking GM %', 'Module', 'Inverter', 'MMS', 'Cabling', 'Infra Bos', 'Other Bos', 'Others', 'Installation GM %'];
+
+  document.getElementById('devTbody').innerHTML = `
+    <tr><td># Orders</td><td>${orders}</td><td>${orders}</td><td>${orders}</td></tr>
+    <tr><td>Capacity (kWp)</td><td>${fmtN(cap)}</td><td>${fmtN(cap)}</td><td>${fmtN(cap)}</td></tr>
+    <tr><td>Revenue (₹)</td><td>${fmtN(rev)}</td><td>${fmtN(rev)}</td><td>${fmtN(rev)}</td></tr>
+    <tr><td>GM%</td><td>${bGM_Pct.toFixed(2)}%</td><td>${dGM_Pct.toFixed(2)}%</td><td>${iGM_Pct.toFixed(2)}%</td></tr>
+    <tr><td>GM Value (₹)</td><td>${fmtN(bGM_Val)}</td><td>${fmtN(dGM_Val)}</td><td>${fmtN(iGM_Val)}</td></tr>
+  `;
+
+  if (waterfallChartInstance) waterfallChartInstance.destroy();
+  
+  const waterfallLabels = {
+    id: 'waterfallLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.data.datasets[0].data.forEach((dp, i) => {
+        const meta = chart.getDatasetMeta(0);
+        const bar = meta.data[i];
+        if (!bar) return;
+        
+        ctx.save();
+        ctx.font = "800 11px 'Nunito', sans-serif";
+        ctx.textAlign = 'center';
+        
+        let valStr = "";
+        if (i === 0 || i === steps.length - 1) {
+          valStr = dp[1].toFixed(2) + "%";
+          ctx.fillStyle = "#fff";
+          ctx.fillText(valStr, bar.x, bar.y + 15);
+        } else {
+          const diff = dp[1] - dp[0];
+          valStr = (diff > 0 ? "+" : "") + diff.toFixed(2) + "%";
+          ctx.fillStyle = diff >= 0 ? "#00897b" : "#d32f2f";
+          const yPos = diff >= 0 ? bar.y - 8 : bar.y + 15; 
+          ctx.fillText(valStr, bar.x, yPos);
+        }
+        ctx.restore();
+      });
+    }
+  };
+
+  waterfallChartInstance = new Chart(document.getElementById('waterfallChart'), {
+    type: 'bar',
+    plugins: [waterfallLabels],
+    data: {
+      labels: labels,
+      datasets: [{
+        data: steps,
+        backgroundColor: (ctx) => {
+          const i = ctx.dataIndex;
+          if (i === 0 || i === steps.length - 1) return '#1a237e';
+          const raw = ctx.raw;
+          return raw[1] >= raw[0] ? '#00897b' : '#d32f2f';
+        },
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { weight: '800', size: 11 }, color: '#1a237e' } },
+        y: { grid: { color: '#edf0fb' }, ticks: { callback: v => v + '%', font: { weight: '700' } } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════
 async function initDashboard(){
@@ -1492,7 +1711,6 @@ async function initDashboard(){
     allRows=await fetchSheetData();
     if(!allRows.length)throw new Error("No rows returned from sheet");
     
-    // FIXED MULTIPLIER: Increased to 100,000 to correct 1.32 Cr to 132 Cr
     allRows.forEach(r => {
       if(r[CONFIG.COL_REVENUE]) r[CONFIG.COL_REVENUE] = String(num(r[CONFIG.COL_REVENUE]) * 100000);
       if(r[CONFIG.COL_INST_GM]) r[CONFIG.COL_INST_GM] = String(num(r[CONFIG.COL_INST_GM]) * 100000);
